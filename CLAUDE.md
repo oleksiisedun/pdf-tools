@@ -62,10 +62,12 @@ Sourced (never executed) by every tool script. Provides:
 - `require_bin` — the "single binary must exist or bail with an apt install hint" dependency check. Only fits the single-binary case (`pdfjam`, `gs`); the contrast-enhancer's multi-package + venv bootstrap is different in kind and stays inline in its own script rather than being generalized here.
 - `prompt_input_file` / `prompt_output_path` — the shared file-prompt loops (validate-exists, default-on-empty, overwrite-confirmation) that back every tool's I/O prompts.
 - `draw_progress` — renders an in-place ASCII progress bar (`\r` + fixed width). Callers parse tool-specific progress markers out of a subprocess's output stream and feed page counts to this function (see below).
+- `dump_log_and_die` — prints `"<label> failed. Full log:"`, cats the tool's tempfile logfile, removes it, and exits 1. Every tool calls this from its failure branch instead of repeating the cat/rm/exit sequence inline.
+- `report_size_comparison` — prints the `"Done! Output saved to: ..."` success message plus input/output file sizes (via `du -sh`). Used by tools that transform a PDF in place (compressor, contrast-enhancer); `pdf-a5-print.sh` prints its own "Done!" line directly since combining two inputs into one output has no single size comparison to report.
 
 ### Per-tool scripts
 
-Each tool script follows the same shape: dependency check → prompt for input file → prompt for tool-specific options → prompt for output path → run the external tool into a temp logfile, printing full log contents only on failure.
+Each tool script follows the same shape: dependency check → prompt for input file → prompt for tool-specific options → prompt for output path → run the external tool into a temp logfile, calling `dump_log_and_die` on failure and `report_size_comparison` (where applicable) on success.
 
 - **`pdf-a5-print.sh`** — thinnest tool; single `pdfjam` invocation, no progress bar.
 - **`pdf-compressor.sh`** — pipes Ghostscript's own stderr output through a `while read` loop, regex-matching `Processing pages 1 through N` and `Page N` lines to drive `draw_progress`. Exit status is captured via `PIPESTATUS[0]` since the real command is the left side of a pipe.
