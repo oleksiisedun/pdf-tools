@@ -36,9 +36,7 @@ LOGFILE=$(mktemp)
 if pdfjam --nup 2x1 --landscape --paper a4paper \
     "$FILE1" "$FILE2" --outfile "$OUTPUT" &>"$LOGFILE"; then
     ok "Done! Output saved to: $(realpath "$OUTPUT")"
+    rm -f "$LOGFILE"
 else
-    err "pdfjam failed. Full log:"
-    echo ""
-    cat "$LOGFILE"
+    dump_log_and_die "pdfjam" "$LOGFILE"
 fi
-rm -f "$LOGFILE"

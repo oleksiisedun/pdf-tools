@@ -23,6 +23,34 @@ clean_path() {
     echo "$p"
 }
 
+# dump_log_and_die <label> <logfile>
+# Prints "<label> failed. Full log:" followed by the logfile contents, then
+# removes the logfile and exits 1. Used by every tool that runs an external
+# command into a tempfile logfile.
+dump_log_and_die() {
+    local label="$1" logfile="$2"
+    err "$label failed. Full log:"
+    echo ""
+    cat "$logfile"
+    rm -f "$logfile"
+    exit 1
+}
+
+# report_size_comparison <input-file> <output-file>
+# Prints the standard "Done!" success message plus an input/output size
+# comparison. Used by tools that transform a PDF in place (compressor,
+# contrast-enhancer).
+report_size_comparison() {
+    local input="$1" output="$2"
+    local input_size output_size
+    input_size=$(du -sh "$input" | cut -f1)
+    output_size=$(du -sh "$output" | cut -f1)
+    ok "Done! Output saved to: $(realpath "$output")"
+    echo ""
+    echo "  Input size:  $input_size"
+    echo "  Output size: $output_size"
+}
+
 draw_progress() {
     local current=$1 total=$2 width=40
     local percent=$(( current * 100 / total ))

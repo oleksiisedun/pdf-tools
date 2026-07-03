@@ -121,18 +121,9 @@ set -e
 echo ""
 
 if [[ "$PYTHON_EXIT" -ne 0 ]]; then
-	err "Enhancement failed. Full log:"
-	echo ""
-	cat "$LOGFILE"
-	rm -f "$LOGFILE"
-	exit 1
+	dump_log_and_die "Enhancement" "$LOGFILE"
 fi
 
-INPUT_SIZE=$(du -sh "$INPUT" | cut -f1)
-OUTPUT_SIZE=$(du -sh "$OUTPUT" | cut -f1)
-ok "Done! Output saved to: $(realpath "$OUTPUT")"
-echo ""
-echo "  Input size:  $INPUT_SIZE"
-echo "  Output size: $OUTPUT_SIZE"
+report_size_comparison "$INPUT" "$OUTPUT"
 
 rm -f "$LOGFILE"
