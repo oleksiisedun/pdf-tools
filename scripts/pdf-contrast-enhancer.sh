@@ -1,11 +1,23 @@
 #!/bin/bash
 
+# ============================================================
+#  pdf-contrast-enhancer.sh
+#  Increases contrast and sharpness of every page in a PDF by
+#  rendering pages to images, enhancing them with Pillow, and
+#  reassembling into a PDF.
+#  Dependencies: python3, python3-venv, poppler-utils
+#  (installed automatically below if missing)
+# ============================================================
+
 set -eo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" &>/dev/null && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
 # ── Dependency check ─────────────────────────────────────────
+# Unlike require_bin (single binary, hard-fail), this tool needs multiple
+# apt packages plus a Python venv, so it auto-installs what's missing
+# instead of just printing instructions and exiting.
 
 MISSING_APT=()
 command -v python3        >/dev/null 2>&1 || MISSING_APT+=(python3)
@@ -22,6 +34,9 @@ ok "system dependencies found"
 echo ""
 
 # ── Python virtual environment ───────────────────────────────
+# Persisted outside the repo (~/.pdf-contrast-enhancer-venv) so it survives
+# across runs and clones; only created once, but pip install still runs
+# every time to pick up dependency updates (it's a no-op when already current).
 
 VENV_DIR="$HOME/.pdf-contrast-enhancer-venv"
 VENV_PIP="$VENV_DIR/bin/pip"
@@ -52,6 +67,11 @@ DEFAULT_OUTPUT="${INPUT_BASENAME}_contrast.pdf"
 OUTPUT=$(prompt_output_path "$DEFAULT_OUTPUT")
 
 # ── Run ───────────────────────────────────────────────────────
+# The enhancement logic is embedded as a heredoc rather than a separate
+# .py file so the tool stays a single self-contained script. It's written
+# to a tempfile and run through the venv's Python; it reports progress by
+# printing "PROGRESS:i/total" lines that the bash loop below parses the
+# same way pdf-compressor.sh parses Ghostscript's page-progress output.
 
 LOGFILE=$(mktemp)
 PYFILE=$(mktemp --suffix=.py)
@@ -93,6 +113,8 @@ set +e
 	fi
 done
 
+# PIPESTATUS[0] (not $?) because $? after a pipeline reflects the trailing
+# `while` command, not the Python process on the left of the pipe.
 PYTHON_EXIT="${PIPESTATUS[0]}"
 rm -f "$PYFILE"
 set -e

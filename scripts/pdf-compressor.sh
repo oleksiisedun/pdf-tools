@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# ============================================================
+#  pdf-compressor.sh
+#  Compresses a PDF with Ghostscript, picking one of three
+#  quality/DPI presets.
+#  Dependencies: ghostscript (gs)
+# ============================================================
+
 set -eo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" &>/dev/null && pwd)"
@@ -51,6 +58,11 @@ LOGFILE=$(mktemp)
 echo ""
 set +e
 
+# gs writes its "Processing pages..."/"Page N" progress lines to stderr, so
+# they're redirected into LOGFILE (used for the failure dump below) and also
+# piped to a parser loop that pulls the total page count once, then feeds
+# each page number to draw_progress. GS_EXIT is read from PIPESTATUS[0]
+# because $? after a pipeline only reflects the trailing `while` command.
 gs -sDEVICE=pdfwrite \
    -dCompatibilityLevel=1.4 \
    -dPDFSETTINGS="$PDFSETTINGS" \
