@@ -29,7 +29,6 @@ graph TD
     Log["ok / warn / err"]
     Clean["clean_path()"]
     Progress["draw_progress()"]
-    Banner["print_banner()"]
     ReqBin["require_bin()"]
     PromptIn["prompt_input_file()"]
     PromptOut["prompt_output_path()"]

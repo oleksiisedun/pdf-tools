@@ -13,13 +13,6 @@ ok()   { echo -e "${GREEN}✔ $1${NC}" >&2; }
 warn() { echo -e "${YELLOW}⚠ $1${NC}" >&2; }
 err()  { echo -e "${RED}✘ $1${NC}" >&2; }
 
-# print_banner: usage: print_banner <<'EOF' ...art... EOF
-print_banner() {
-    echo -e "${GREEN}"
-    cat
-    echo -e "${NC}"
-}
-
 # Strip surrounding quotes and unescape spaces (from drag & drop)
 clean_path() {
     local p="$1"
