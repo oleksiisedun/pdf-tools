@@ -2,12 +2,29 @@
 
 A collection of small interactive bash scripts for common PDF tasks. Each tool lives in its own directory and shares a common set of bash helpers (colored logging, drag-and-drop path cleanup, output-file prompts) via `lib/common.sh`, so the tools stay consistent without duplicating the same prompt/logging logic three times.
 
+## Quick start
+
+Run everything through the single entry point, `pdf-tools.sh`:
+
+```bash
+./pdf-tools.sh
+```
+
+With no arguments it shows an interactive menu of all tools; pick one, and after it finishes you're back at the menu to run another (or `q` to quit). You can also jump straight to a tool, by name or number, skipping the menu:
+
+```bash
+./pdf-tools.sh compressor
+./pdf-tools.sh 1          # a5-print
+```
+
 ## Architecture
 
-Each tool script sources `lib/common.sh` for its interactive prompts, logging, and progress-bar rendering, then shells out to its own external dependency to do the actual PDF work.
+`pdf-tools.sh` is the top-level menu/dispatcher; each tool script it launches sources `lib/common.sh` for its interactive prompts, logging, and progress-bar rendering, then shells out to its own external dependency to do the actual PDF work.
 
 ```mermaid
 graph TD
+  Menu["pdf-tools.sh\n(menu / dispatcher)"]
+
   subgraph Lib["lib/common.sh (shared)"]
     Log["ok / warn / err"]
     Clean["clean_path()"]
@@ -18,9 +35,13 @@ graph TD
     PromptOut["prompt_output_path()"]
   end
 
-  A5["a5-print/\npdf-a5-print.sh"] --> Lib
-  Compressor["compressor/\npdf-compressor.sh"] --> Lib
-  Contrast["contrast-enhancer/\npdf-contrast-enhancer.sh"] --> Lib
+  Menu --> A5["a5-print/\npdf-a5-print.sh"]
+  Menu --> Compressor["compressor/\npdf-compressor.sh"]
+  Menu --> Contrast["contrast-enhancer/\npdf-contrast-enhancer.sh"]
+
+  A5 --> Lib
+  Compressor --> Lib
+  Contrast --> Lib
 
   A5 --> Pdfjam[("pdfjam / texlive-extra-utils")]
   Compressor --> Ghostscript[("Ghostscript")]
@@ -28,6 +49,8 @@ graph TD
 ```
 
 ## Tools
+
+Each tool can also be run standalone, from its own directory, instead of through `pdf-tools.sh`:
 
 ### [a5-print](a5-print/README.md)
 
