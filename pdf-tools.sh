@@ -12,7 +12,7 @@
 set -eo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" &>/dev/null && pwd)"
-source "$SCRIPT_DIR/lib/common.sh"
+source "$SCRIPT_DIR/scripts/common.sh"
 
 TOOL_KEYS=(a5-print compressor contrast-enhancer)
 TOOL_LABELS=(
@@ -21,9 +21,9 @@ TOOL_LABELS=(
     "Increase PDF contrast and sharpness"
 )
 TOOL_SCRIPTS=(
-    "$SCRIPT_DIR/a5-print/pdf-a5-print.sh"
-    "$SCRIPT_DIR/compressor/pdf-compressor.sh"
-    "$SCRIPT_DIR/contrast-enhancer/pdf-contrast-enhancer.sh"
+    "$SCRIPT_DIR/scripts/pdf-a5-print.sh"
+    "$SCRIPT_DIR/scripts/pdf-compressor.sh"
+    "$SCRIPT_DIR/scripts/pdf-contrast-enhancer.sh"
 )
 
 print_usage() {
