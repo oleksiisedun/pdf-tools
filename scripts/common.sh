@@ -52,13 +52,13 @@ report_size_comparison() {
 }
 
 draw_progress() {
-    local current=$1 total=$2 width=40
+    local current=$1 total=$2 label="${3:-page}" width=40
     local percent=$(( current * 100 / total ))
     local filled=$(( current * width / total ))
     local bar="" i
     for ((i=0; i<filled; i++)); do bar+="█"; done
     for ((i=filled; i<width; i++)); do bar+="░"; done
-    printf "\r  \033[0;32m[%s]\033[0m %3d%%  page %d / %d" "$bar" "$percent" "$current" "$total"
+    printf "\r  \033[0;32m[%s]\033[0m %3d%%  %s %d / %d" "$bar" "$percent" "$label" "$current" "$total"
 }
 
 # require_bin <binary> <apt-package> [label]
@@ -101,15 +101,15 @@ prompt_input_file() {
     done
 }
 
-# prompt_output_path <default-filename>
-# Prompts for an output filename, enforces .pdf extension, loops on
-# overwrite-confirmation if the target already exists.
+# prompt_output_path <default-filename> [extension]
+# Prompts for an output filename, enforces the given extension (default:
+# pdf), loops on overwrite-confirmation if the target already exists.
 prompt_output_path() {
-    local default="$1" output answer
+    local default="$1" ext="${2:-pdf}" output answer
     read -rp "Enter output file name [$default]: " output
     output="${output/#\~/$HOME}"
     output="${output:-$default}"
-    [[ "$output" != *.pdf ]] && output="${output}.pdf"
+    [[ "$output" != *."$ext" ]] && output="${output}.${ext}"
 
     while [[ -f "$output" ]]; do
         warn "File already exists: $output"
@@ -119,10 +119,10 @@ prompt_output_path() {
         elif [[ -z "$answer" || "$answer" =~ ^[Nn]$ ]]; then
             read -rp "Enter a new output file name: " output
             output="${output/#\~/$HOME}"
-            [[ "$output" != *.pdf ]] && output="${output}.pdf"
+            [[ "$output" != *."$ext" ]] && output="${output}.${ext}"
         else
             output=$(clean_path "$answer")
-            [[ "$output" != *.pdf ]] && output="${output}.pdf"
+            [[ "$output" != *."$ext" ]] && output="${output}.${ext}"
         fi
     done
     echo "$output"

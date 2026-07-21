@@ -14,16 +14,18 @@ set -eo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" &>/dev/null && pwd)"
 source "$SCRIPT_DIR/scripts/common.sh"
 
-TOOL_KEYS=(a5-print compressor contrast-enhancer)
+TOOL_KEYS=(a5-print compressor contrast-enhancer to-video)
 TOOL_LABELS=(
     "Combine two A5 PDFs onto one A4 landscape page"
     "Compress a PDF with Ghostscript"
     "Increase PDF contrast and sharpness"
+    "Convert a PDF presentation to a slideshow video"
 )
 TOOL_SCRIPTS=(
     "$SCRIPT_DIR/scripts/pdf-a5-print.sh"
     "$SCRIPT_DIR/scripts/pdf-compressor.sh"
     "$SCRIPT_DIR/scripts/pdf-contrast-enhancer.sh"
+    "$SCRIPT_DIR/scripts/pdf-to-video.sh"
 )
 
 print_usage() {
