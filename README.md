@@ -1,6 +1,15 @@
 # PDF-tools
 
-A collection of small interactive bash scripts for common PDF tasks. All scripts live in `scripts/` and share a common set of bash helpers (colored logging, drag-and-drop path cleanup, output-file prompts) via `scripts/common.sh`, so the tools stay consistent without duplicating the same prompt/logging logic three times.
+A collection of small interactive bash scripts for common PDF tasks. All scripts live in `scripts/` and share a common set of bash helpers (colored logging, drag-and-drop path cleanup, output-file prompts) via `scripts/common.sh`, so the tools stay consistent without duplicating the same prompt/logging logic across tools.
+
+## Tools
+
+| Tool | What it does |
+|------|---------------|
+| [a5-print](#a5-print) | Combines two A5 PDFs side by side onto a single A4 landscape page |
+| [compressor](#compressor) | Compresses a PDF with Ghostscript, with a choice of three quality presets |
+| [contrast-enhancer](#contrast-enhancer) | Increases the contrast and sharpness of a scanned/photographed PDF |
+| [to-video](#to-video) | Converts a PDF presentation into an MP4 slideshow video, one fixed-duration slide per page |
 
 ## Quick start
 
@@ -30,19 +39,24 @@ graph TD
     A5["pdf-a5-print.sh"]
     Compressor["pdf-compressor.sh"]
     Contrast["pdf-contrast-enhancer.sh"]
+    ToVideo["pdf-to-video.sh"]
   end
 
   Menu --> A5
   Menu --> Compressor
   Menu --> Contrast
+  Menu --> ToVideo
 
   A5 --> Common
   Compressor --> Common
   Contrast --> Common
+  ToVideo --> Common
 
   A5 --> Pdfjam[("pdfjam / texlive-extra-utils")]
   Compressor --> Ghostscript[("Ghostscript")]
   Contrast --> Venv[("Python venv\npdf2image + pillow + img2pdf")]
+  ToVideo --> Pdftoppm[("pdftoppm / poppler-utils")]
+  ToVideo --> Ffmpeg[("ffmpeg")]
 ```
 
 ## Tools
@@ -99,9 +113,22 @@ Prompts for the input PDF and an output file name (defaults to `<original-name>_
 
 Output file size will be comparable to the original.
 
+### to-video
+
+Converts a PDF presentation into an MP4 slideshow video, showing each page for a fixed number of seconds. Requires `poppler-utils` and `ffmpeg`:
+
+```bash
+sudo apt install poppler-utils ffmpeg
+./scripts/pdf-to-video.sh
+```
+
+Prompts for the input PDF, seconds per slide (default: 5), and an output file name (defaults to `<original-name>_slideshow.mp4`).
+
+Each page is rendered at 150 DPI and encoded into a 1920x1080 letterboxed H.264/yuv420p video for broad TV/USB playback compatibility.
+
 ## Common behavior
 
-All three tools share the same interaction style:
+All four tools share the same interaction style:
 
 - File paths can be typed manually or dragged and dropped from a file manager (`~` expansion, quoted paths, and backslash-escaped spaces are all handled).
 - If the output file already exists, you're prompted to overwrite it or choose a different name.
