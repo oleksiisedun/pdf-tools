@@ -6,10 +6,10 @@ A collection of small interactive bash scripts for common PDF tasks. All scripts
 
 | Tool | What it does |
 |------|---------------|
-| [a5-print](#a5-print) | Combines two A5 PDFs side by side onto a single A4 landscape page |
-| [compressor](#compressor) | Compresses a PDF with Ghostscript, with a choice of three quality presets |
-| [contrast-enhancer](#contrast-enhancer) | Increases the contrast and sharpness of a scanned/photographed PDF |
-| [to-video](#to-video) | Converts a PDF presentation into an MP4 slideshow video, one fixed-duration slide per page |
+| [pdf-a5-print](#pdf-a5-print) | Combines two A5 PDFs side by side onto a single A4 landscape page |
+| [pdf-compressor](#pdf-compressor) | Compresses a PDF with Ghostscript, with a choice of three quality presets |
+| [pdf-contrast-enhancer](#pdf-contrast-enhancer) | Increases the contrast and sharpness of a scanned/photographed PDF |
+| [pdf-to-video](#pdf-to-video) | Converts a PDF presentation into an MP4 slideshow video, one fixed-duration slide per page |
 
 ## Quick start
 
@@ -22,8 +22,8 @@ Run everything through the single entry point, `pdf-tools.sh`:
 With no arguments it shows an interactive menu of all tools; pick one, and after it finishes you're back at the menu to run another (or `q` to quit). You can also jump straight to a tool, by name or number, skipping the menu:
 
 ```bash
-./pdf-tools.sh compressor
-./pdf-tools.sh 1          # a5-print
+./pdf-tools.sh pdf-compressor
+./pdf-tools.sh 1          # pdf-a5-print
 ```
 
 ## Architecture
@@ -63,7 +63,7 @@ graph TD
 
 Each tool can also be run standalone, without going through the menu:
 
-### a5-print
+### pdf-a5-print
 
 Combines two A5 PDFs side by side onto a single A4 landscape page. Requires `pdfjam` from the `texlive-extra-utils` package:
 
@@ -74,7 +74,7 @@ sudo apt install texlive-extra-utils
 
 Prompts for the first A5 PDF, the second A5 PDF (press Enter to reuse the first file), and an output file name (defaults to `output_A4_landscape.pdf`).
 
-### compressor
+### pdf-compressor
 
 Compresses a PDF using Ghostscript, with a choice of three quality presets. Requires `ghostscript`:
 
@@ -93,7 +93,7 @@ Prompts for the input PDF, a compression level, and an output file name (default
 
 Compression results vary depending on the source material — some PDFs may not shrink significantly.
 
-### contrast-enhancer
+### pdf-contrast-enhancer
 
 Increases the contrast and sharpness of a PDF. Requires `python3`, `python3-venv`, and `poppler-utils`:
 
@@ -113,7 +113,7 @@ Prompts for the input PDF and an output file name (defaults to `<original-name>_
 
 Output file size will be comparable to the original.
 
-### to-video
+### pdf-to-video
 
 Converts a PDF presentation into an MP4 slideshow video, showing each page for a fixed number of seconds. Requires `poppler-utils` and `ffmpeg`:
 

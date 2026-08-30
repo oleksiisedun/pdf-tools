@@ -8,7 +8,7 @@ There's no test suite. Verify a change by actually running the affected tool end
 
 ```bash
 ./pdf-tools.sh                 # interactive menu
-./pdf-tools.sh compressor       # jump straight to a tool by key
+./pdf-tools.sh pdf-compressor    # jump straight to a tool by key
 ./pdf-tools.sh 1                 # or by menu number
 ./scripts/pdf-compressor.sh      # run a tool standalone, bypassing the menu
 ```

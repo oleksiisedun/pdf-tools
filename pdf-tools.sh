@@ -14,7 +14,7 @@ set -eo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" &>/dev/null && pwd)"
 source "$SCRIPT_DIR/scripts/common.sh"
 
-TOOL_KEYS=(a5-print compressor contrast-enhancer to-video)
+TOOL_KEYS=(pdf-a5-print pdf-compressor pdf-contrast-enhancer pdf-to-video)
 TOOL_LABELS=(
     "Combine two A5 PDFs onto one A4 landscape page"
     "Compress a PDF with Ghostscript"
@@ -35,7 +35,7 @@ print_usage() {
     echo "Available tools:"
     local i
     for i in "${!TOOL_KEYS[@]}"; do
-        printf "  %d) %-18s %s\n" "$((i + 1))" "${TOOL_KEYS[$i]}" "${TOOL_LABELS[$i]}"
+        printf "  %d) %-23s %s\n" "$((i + 1))" "${TOOL_KEYS[$i]}" "${TOOL_LABELS[$i]}"
     done
 }
 
@@ -66,7 +66,7 @@ show_menu() {
     echo "Select a tool:"
     local i
     for i in "${!TOOL_KEYS[@]}"; do
-        printf "  %d) %-18s %s\n" "$((i + 1))" "${TOOL_KEYS[$i]}" "${TOOL_LABELS[$i]}"
+        printf "  %d) %-23s %s\n" "$((i + 1))" "${TOOL_KEYS[$i]}" "${TOOL_LABELS[$i]}"
     done
     echo "  q) Quit"
     echo ""
