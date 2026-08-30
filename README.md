@@ -133,3 +133,19 @@ All four tools share the same interaction style:
 - File paths can be typed manually or dragged and dropped from a file manager (`~` expansion, quoted paths, and backslash-escaped spaces are all handled).
 - If the output file already exists, you're prompted to overwrite it or choose a different name.
 - Missing dependencies are detected on first run, with install instructions (or automatic installation, for the contrast-enhancer) printed to the terminal.
+
+## Development
+
+There's no build system or automated test suite — this is plain bash plus a small embedded Python script (in `pdf-contrast-enhancer.sh`). Verify a change by running the affected tool end-to-end:
+
+```bash
+./pdf-tools.sh                    # interactive menu
+./pdf-tools.sh pdf-compressor     # jump straight to a tool by key
+./scripts/pdf-compressor.sh       # or run a tool standalone, bypassing the menu
+```
+
+For a quick syntax check without executing anything:
+
+```bash
+bash -n scripts/<file>.sh
+```
