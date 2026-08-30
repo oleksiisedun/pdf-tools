@@ -24,36 +24,7 @@ Each tool declares its own external dependency and checks for it at startup (`re
 
 ## Architecture
 
-`pdf-tools.sh` is a thin dispatcher; each tool script sources `scripts/common.sh` for shared interactive helpers, then shells out to its own external dependency to do the real work.
-
-```mermaid
-graph TD
-  Menu["pdf-tools.sh\n(entry point / dispatcher)"]
-
-  subgraph Scripts["scripts/"]
-    Common["common.sh\n(shared helpers)"]
-    A5["pdf-a5-print.sh"]
-    Compressor["pdf-compressor.sh"]
-    Contrast["pdf-contrast-enhancer.sh"]
-    ToVideo["pdf-to-video.sh"]
-  end
-
-  Menu --> A5
-  Menu --> Compressor
-  Menu --> Contrast
-  Menu --> ToVideo
-
-  A5 --> Common
-  Compressor --> Common
-  Contrast --> Common
-  ToVideo --> Common
-
-  A5 --> Pdfjam[("pdfjam / texlive-extra-utils")]
-  Compressor --> Ghostscript[("Ghostscript")]
-  Contrast --> Venv[("Python venv\npdf2image + pillow + img2pdf")]
-  ToVideo --> Pdftoppm[("pdftoppm / poppler-utils")]
-  ToVideo --> Ffmpeg[("ffmpeg")]
-```
+`pdf-tools.sh` is a thin dispatcher; each tool script sources `scripts/common.sh` for shared interactive helpers, then shells out to its own external dependency to do the real work. See README.md for the rendered architecture diagram.
 
 ### Dispatcher pattern (`pdf-tools.sh`)
 
