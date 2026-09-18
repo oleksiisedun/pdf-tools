@@ -1,0 +1,33 @@
+#!/bin/bash
+# Runs every static check (no network, no PDF tools needed) and exits
+# non-zero if any fail. Set CI=1 to make missing optional tools
+# (shellcheck, ruff) a failure instead of a skipped check.
+
+set -uo pipefail
+# shellcheck source=checks/lib.sh
+source "$(dirname -- "${BASH_SOURCE[0]}")/checks/lib.sh"
+
+sh_files=(pdf-tools.sh check.sh scripts/*.sh checks/*.sh)
+
+echo "==> bash -n"
+for f in "${sh_files[@]}"; do
+    bash -n "$f" || fail "Syntax error in $f"
+done
+
+echo "==> shellcheck"
+if optional_bin shellcheck "sudo apt install shellcheck"; then
+    shellcheck -x --source-path=SCRIPTDIR "${sh_files[@]}" || fail "shellcheck reported issues"
+fi
+
+echo "==> conventions"
+checks/conventions.sh || failures=$((failures + 1))
+
+echo "==> embedded Python"
+checks/embedded-python.sh || failures=$((failures + 1))
+
+echo ""
+if ((failures > 0)); then
+    err "$failures check(s) failed"
+    exit 1
+fi
+ok "All checks passed"

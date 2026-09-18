@@ -1,0 +1,52 @@
+#!/bin/bash
+# Repo-specific conventions from CLAUDE.md that generic linters can't see:
+# stderr status helpers, script boilerplate, and dispatcher registration.
+
+set -uo pipefail
+# shellcheck source=lib.sh
+source "$(dirname -- "${BASH_SOURCE[0]}")/lib.sh"
+
+tool_scripts=(scripts/pdf-*.sh)
+entry_scripts=(pdf-tools.sh "${tool_scripts[@]}")
+
+# ok/warn/err must write to stderr: prompt_input_file/prompt_output_path
+# return their result on stdout through $(...), so status text on stdout
+# would corrupt the returned path.
+for fn in ok warn err; do
+    grep -Eq "^${fn}\\(\\)[[:space:]]*\\{.*>&2;?[[:space:]]*\\}" scripts/common.sh ||
+        fail "scripts/common.sh: $fn() must write to stderr (>&2)"
+done
+
+for f in "${entry_scripts[@]}"; do
+    [[ -x "$f" ]] || fail "$f: not executable"
+    [[ "$(head -n1 "$f")" == "#!/bin/bash" ]] || fail "$f: first line must be #!/bin/bash"
+    grep -q '^set -eo pipefail' "$f" || fail "$f: missing 'set -eo pipefail'"
+done
+
+for f in "${tool_scripts[@]}"; do
+    grep -qF "source \"\$SCRIPT_DIR/common.sh\"" "$f" || fail "$f: must source common.sh"
+    grep -q 'dump_log_and_die' "$f" || fail "$f: failure branch must call dump_log_and_die"
+    grep -qF "cat \"\$LOGFILE\"" "$f" && fail "$f: inline 'cat \$LOGFILE' -- use dump_log_and_die"
+done
+
+# Dispatcher: TOOL_KEYS, TOOL_LABELS and TOOL_SCRIPTS are parallel arrays.
+mapfile -t keys < <(sed -n 's/^TOOL_KEYS=(\(.*\))$/\1/p' pdf-tools.sh | tr ' ' '\n')
+mapfile -t registered < <(sed -n '/^TOOL_SCRIPTS=(/,/^)/p' pdf-tools.sh | grep -o 'scripts/[^"]*\.sh')
+label_count=$(sed -n '/^TOOL_LABELS=(/,/^)/p' pdf-tools.sh | grep -c '^ *"')
+
+if ((${#keys[@]} == 0 || ${#registered[@]} == 0)); then
+    fail "pdf-tools.sh: could not parse TOOL_KEYS/TOOL_SCRIPTS"
+elif ((${#keys[@]} != ${#registered[@]} || ${#registered[@]} != label_count)); then
+    fail "pdf-tools.sh: TOOL_KEYS (${#keys[@]}), TOOL_LABELS ($label_count) and TOOL_SCRIPTS (${#registered[@]}) differ in length"
+else
+    for i in "${!keys[@]}"; do
+        [[ "${registered[$i]}" == "scripts/${keys[$i]}.sh" ]] ||
+            fail "pdf-tools.sh: TOOL_KEYS[$i] '${keys[$i]}' doesn't match TOOL_SCRIPTS[$i] '${registered[$i]}'"
+    done
+fi
+
+for f in "${tool_scripts[@]}"; do
+    printf '%s\n' "${registered[@]}" | grep -qx "$f" || fail "$f: not registered in pdf-tools.sh"
+done
+
+((failures == 0)) || exit 1
