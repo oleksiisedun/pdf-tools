@@ -145,7 +145,7 @@ Missing packages are detected and installed automatically on first run. The scri
 
 Prompts for a signature image (PNG, ideally with a transparent background), the signer's full name, an input PDF **or a folder of PDFs** (batch mode), an output path, and placement tuning (gap, signature height, extra horizontal shift — all in points, with sensible defaults). In batch mode every `.pdf` in the input folder is signed into the output folder under the same filename; a failure on one file is reported and doesn't stop the rest of the batch.
 
-OCR is currently tuned for Ukrainian names (`tesseract-ocr-ukr`); matching is done by prefix, so Ukrainian case endings (e.g. СИЗОВ / СИЗОВУ / СИЗОВА) still match.
+OCR is currently tuned for Ukrainian names (`tesseract-ocr-ukr`); matching is done by prefix, so Ukrainian case endings (e.g. СЕДУН / СЕДУНУ / СЕДУНА) still match.
 
 ## Common behavior
 

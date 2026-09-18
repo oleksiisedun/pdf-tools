@@ -65,7 +65,7 @@ echo ""
 # ── Input: signer name ────────────────────────────────────────
 SIGNER_NAME=""
 while [[ -z "$SIGNER_NAME" ]]; do
-	read -rp 'Enter signer'"'"'s full name (e.g. "Сергій Сизов"): ' SIGNER_NAME
+	read -rp 'Enter signer'"'"'s full name (e.g. "Олексій Седун"): ' SIGNER_NAME
 	[[ -z "$SIGNER_NAME" ]] && err "Signer name cannot be empty."
 done
 
@@ -151,7 +151,7 @@ def _ocr_words(page, dpi=OCR_DPI):
 def find_name_box(page, name_parts, dpi=OCR_DPI):
     """Return (x0, y0, x1, y1) in PDF points around the first place on this
     page where the words of `name_parts` appear next to each other (matched
-    by prefix, so Ukrainian case endings like СИЗОВ / СИЗОВУ / СИЗОВА still
+    by prefix, so Ukrainian case endings like СЕДУН / СЕДУНУ / СЕДУНА still
     match), or None if not found."""
     data = _ocr_words(page, dpi)
     scale = 72.0 / dpi
