@@ -51,6 +51,22 @@ report_size_comparison() {
     echo "  Output size: $output_size"
 }
 
+# prompt_number <prompt-text> <default> [regex] [error-message]
+# Prompts for a numeric value, applying the default on empty input, and
+# loops on invalid input until it matches regex (default: non-negative
+# integer or decimal).
+prompt_number() {
+    local prompt="$1" default="$2" regex="${3:-^[0-9]+(\.[0-9]+)?$}" error_msg="${4:-Enter a valid number.}" value
+    read -rp "$prompt" value
+    value="${value:-$default}"
+    while [[ ! "$value" =~ $regex ]]; do
+        err "$error_msg"
+        read -rp "$prompt" value
+        value="${value:-$default}"
+    done
+    echo "$value"
+}
+
 draw_progress() {
     local current=$1 total=$2 label="${3:-page}" width=40
     local percent=$(( current * 100 / total ))

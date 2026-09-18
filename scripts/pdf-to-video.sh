@@ -27,12 +27,7 @@ ok "Input: $INPUT"
 # ── Option: seconds per slide ─────────────────────────────────
 
 echo ""
-read -rp "Seconds per slide (default: 5): " SECONDS_PER_SLIDE
-SECONDS_PER_SLIDE="${SECONDS_PER_SLIDE:-5}"
-while [[ ! "$SECONDS_PER_SLIDE" =~ ^[1-9][0-9]*$ ]]; do
-	err "Enter a whole number of seconds greater than 0."
-	read -rp "Seconds per slide: " SECONDS_PER_SLIDE
-done
+SECONDS_PER_SLIDE=$(prompt_number "Seconds per slide (default: 5): " 5 '^[1-9][0-9]*$' "Enter a whole number of seconds greater than 0.")
 
 ok "Duration: ${SECONDS_PER_SLIDE}s per slide"
 echo ""
