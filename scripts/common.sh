@@ -82,7 +82,8 @@ draw_progress() {
 # single-binary case (pdfjam, gs) -- contrast-enhancer's multi-package
 # auto-install + venv bootstrap is different in kind and stays inline.
 require_bin() {
-    local bin="$1" apt_pkg="$2" label="${3:-$bin}"
+    local bin="$1" apt_pkg="$2"
+    local label="${3:-$bin}"
     if command -v "$bin" &>/dev/null; then
         ok "$label found"
     else
