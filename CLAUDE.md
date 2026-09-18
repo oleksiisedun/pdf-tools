@@ -13,7 +13,13 @@ There's no test suite. Verify a change by actually running the affected tool end
 ./scripts/pdf-compressor.sh      # run a tool standalone, bypassing the menu
 ```
 
-A quick syntax check without executing anything: `bash -n scripts/<file>.sh`.
+Run `./check.sh` after every edit — it's the single entry point for the static checks (fast, no network, doesn't execute any tool):
+
+- `bash -n` and `shellcheck -x` on every shell script. `shellcheck` and `ruff` are optional locally (skipped with a warning if missing); `CI=1 ./check.sh` makes a missing tool a failure.
+- `checks/conventions.sh` — enforces the rules below: `ok`/`warn`/`err` write to stderr, every entry script has `#!/bin/bash` + `set -eo pipefail` + the executable bit, every tool script sources `common.sh` and fails via `dump_log_and_die` (no inline `cat "$LOGFILE"`), and `TOOL_KEYS`/`TOOL_LABELS`/`TOOL_SCRIPTS` in `pdf-tools.sh` are equal length, aligned (`TOOL_KEYS[i]` == script basename) and cover every `scripts/pdf-*.sh`.
+- `checks/embedded-python.sh` — extracts each `<< 'PYEOF'` heredoc and checks syntax plus `ruff --select E9,F` (undefined names, unused imports); line numbers are relative to the heredoc.
+
+`check.sh` and `checks/*.sh` share `checks/lib.sh` (sources `common.sh`, `fail`, `optional_bin`). It still doesn't replace running a tool end-to-end for behavioral changes.
 
 Each tool declares its own external dependency and checks for it at startup (`require_bin` in `pdf-a5-print.sh`/`pdf-compressor.sh`/`pdf-to-video.sh`; a manual apt-check block in `pdf-contrast-enhancer.sh`/`pdf-signer.sh`). Install the relevant package before testing a tool:
 
