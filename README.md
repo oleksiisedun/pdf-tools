@@ -10,6 +10,7 @@ A collection of small interactive bash scripts for common PDF tasks. All scripts
 | [pdf-compressor](#pdf-compressor) | Compresses a PDF with Ghostscript, with a choice of three quality presets |
 | [pdf-contrast-enhancer](#pdf-contrast-enhancer) | Increases the contrast and sharpness of a scanned/photographed PDF |
 | [pdf-to-video](#pdf-to-video) | Converts a PDF presentation into an MP4 slideshow video, one fixed-duration slide per page |
+| [pdf-signer](#pdf-signer) | OCRs a scanned PDF for a signer's printed name and stamps a signature image next to it |
 
 ## Quick start
 
@@ -40,23 +41,28 @@ graph TD
     Compressor["pdf-compressor.sh"]
     Contrast["pdf-contrast-enhancer.sh"]
     ToVideo["pdf-to-video.sh"]
+    Signer["pdf-signer.sh"]
   end
 
   Menu --> A5
   Menu --> Compressor
   Menu --> Contrast
   Menu --> ToVideo
+  Menu --> Signer
 
   A5 --> Common
   Compressor --> Common
   Contrast --> Common
   ToVideo --> Common
+  Signer --> Common
 
   A5 --> Pdfjam[("pdfjam / texlive-extra-utils")]
   Compressor --> Ghostscript[("Ghostscript")]
   Contrast --> Venv[("Python venv\npdf2image + pillow + img2pdf")]
   ToVideo --> Pdftoppm[("pdftoppm / poppler-utils")]
   ToVideo --> Ffmpeg[("ffmpeg")]
+  Signer --> SignerVenv[("Python venv\npymupdf + pytesseract + pillow")]
+  Signer --> Tesseract[("tesseract-ocr + tesseract-ocr-ukr")]
 ```
 
 ## Tools
@@ -126,17 +132,32 @@ Prompts for the input PDF, seconds per slide (default: 5), and an output file na
 
 Each page is rendered at 150 DPI and encoded into a 1920x1080 letterboxed H.264/yuv420p video for broad TV/USB playback compatibility.
 
+### pdf-signer
+
+OCRs a scanned PDF (no text layer needed) looking for a signer's printed name, then stamps a signature image just to its left, vertically centered. Pages are checked from the last page backward, stopping at the first match. Requires `python3`, `python3-venv`, `tesseract-ocr`, and `tesseract-ocr-ukr`:
+
+```bash
+sudo apt install python3 python3-venv tesseract-ocr tesseract-ocr-ukr
+./scripts/pdf-signer.sh
+```
+
+Missing packages are detected and installed automatically on first run. The script also creates a Python virtual environment at `~/.pdf-signer-venv` and installs the required Python packages (`pymupdf`, `pytesseract`, `pillow`) on first run.
+
+Prompts for a signature image (PNG, ideally with a transparent background), the signer's full name, an input PDF **or a folder of PDFs** (batch mode), an output path, and placement tuning (gap, signature height, extra horizontal shift — all in points, with sensible defaults). In batch mode every `.pdf` in the input folder is signed into the output folder under the same filename; a failure on one file is reported and doesn't stop the rest of the batch.
+
+OCR is currently tuned for Ukrainian names (`tesseract-ocr-ukr`); matching is done by prefix, so Ukrainian case endings (e.g. СИЗОВ / СИЗОВУ / СИЗОВА) still match.
+
 ## Common behavior
 
-All four tools share the same interaction style:
+All tools share the same interaction style:
 
 - File paths can be typed manually or dragged and dropped from a file manager (`~` expansion, quoted paths, and backslash-escaped spaces are all handled).
 - If the output file already exists, you're prompted to overwrite it or choose a different name.
-- Missing dependencies are detected on first run, with install instructions (or automatic installation, for the contrast-enhancer) printed to the terminal.
+- Missing dependencies are detected on first run, with install instructions (or automatic installation, for the contrast-enhancer and signer) printed to the terminal.
 
 ## Development
 
-There's no build system or automated test suite — this is plain bash plus a small embedded Python script (in `pdf-contrast-enhancer.sh`). Verify a change by running the affected tool end-to-end:
+There's no build system or automated test suite — this is plain bash plus small embedded Python scripts (in `pdf-contrast-enhancer.sh` and `pdf-signer.sh`). Verify a change by running the affected tool end-to-end:
 
 ```bash
 ./pdf-tools.sh                    # interactive menu

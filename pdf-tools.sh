@@ -14,18 +14,20 @@ set -eo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" &>/dev/null && pwd)"
 source "$SCRIPT_DIR/scripts/common.sh"
 
-TOOL_KEYS=(pdf-a5-print pdf-compressor pdf-contrast-enhancer pdf-to-video)
+TOOL_KEYS=(pdf-a5-print pdf-compressor pdf-contrast-enhancer pdf-to-video pdf-signer)
 TOOL_LABELS=(
     "Combine two A5 PDFs onto one A4 landscape page"
     "Compress a PDF with Ghostscript"
     "Increase PDF contrast and sharpness"
     "Convert a PDF presentation to a slideshow video"
+    "Stamp a signature image next to a signer's name in a scanned PDF"
 )
 TOOL_SCRIPTS=(
     "$SCRIPT_DIR/scripts/pdf-a5-print.sh"
     "$SCRIPT_DIR/scripts/pdf-compressor.sh"
     "$SCRIPT_DIR/scripts/pdf-contrast-enhancer.sh"
     "$SCRIPT_DIR/scripts/pdf-to-video.sh"
+    "$SCRIPT_DIR/scripts/pdf-signer.sh"
 )
 
 print_usage() {
