@@ -14,6 +14,8 @@ A collection of small interactive bash scripts for common PDF tasks. All tools l
 
 ## Quick start
 
+The tools target Debian/Ubuntu: dependency hints and auto-installs use `apt`.
+
 Run everything through the single entry point, `pdf-tools.sh`:
 
 ```bash
@@ -37,7 +39,7 @@ graph TD
 
   subgraph Tools["tools/"]
     Common["common.sh\n(shared helpers)"]
-  Py["py/\n(Python payloads)"]
+    Py["py/\n(Python payloads)"]
     A5["pdf-a5-print.sh"]
     Compressor["pdf-compressor.sh"]
     Contrast["pdf-contrast-enhancer.sh"]
@@ -68,7 +70,7 @@ graph TD
   Signer --> Tesseract[("tesseract-ocr + tesseract-ocr-ukr")]
 ```
 
-## Tools
+## Tool details
 
 Each tool can also be run standalone, without going through the menu:
 
@@ -165,7 +167,7 @@ There's no build system or automated test suite — this is plain bash plus smal
 ```bash
 ./pdf-tools.sh                    # interactive menu
 ./pdf-tools.sh pdf-compressor     # jump straight to a tool by key
-./tools/pdf-compressor.sh       # or run a tool standalone, bypassing the menu
+./tools/pdf-compressor.sh         # or run a tool standalone, bypassing the menu
 ```
 
 For fast static checks that don't execute anything or need the PDF tools installed:
@@ -175,3 +177,11 @@ For fast static checks that don't execute anything or need the PDF tools install
 ```
 
 This runs `bash -n` and `shellcheck` on every script, repo-specific convention checks (`checks/conventions.sh`), and a syntax + `ruff` pass over `tools/py/*.py` (`checks/python.sh`). `shellcheck` (`sudo apt install shellcheck`) and `ruff` (`pip install ruff`) are optional locally — a missing one is skipped with a warning — but set `CI=1` to make a missing tool a failure.
+
+### Adding a tool
+
+1. Create `tools/pdf-<name>.sh`, sourcing `common.sh` (see an existing tool for the dependency check → prompts → run shape). Python payloads go in `tools/py/pdf-<name>.py`, not heredocs.
+2. Register it in the three parallel arrays (`TOOL_KEYS`, `TOOL_LABELS`, `TOOL_SCRIPTS`) in `pdf-tools.sh`.
+3. Add any default output filename pattern to `.gitignore`, and a row, section and diagram node to this README.
+
+`./check.sh` enforces steps 1–2.
