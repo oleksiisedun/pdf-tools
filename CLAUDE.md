@@ -65,4 +65,6 @@ Each tool script follows the same shape: dependency check → prompt for input f
 
 1. Create `tools/pdf-<name>.sh`, sourcing `common.sh` and following the dependency-check → input → options → output → run shape above. If it needs Python, put the payload in `tools/py/pdf-<name>.py` (same basename) and run it via the venv's interpreter — no heredocs.
 2. Register it in `pdf-tools.sh`'s three parallel arrays.
-3. Update `.gitignore` if the tool produces a default output filename that should be excluded (see existing `*_compressed.pdf`, `*_contrast.pdf`, `output_A4_landscape.pdf` entries).
+3. Update `.gitignore` if the tool produces a default output filename that should be excluded (follow the existing `*_<suffix>.<ext>` patterns there).
+
+`./check.sh` verifies steps 1–2 (boilerplate, registration, `tools/py/` naming) but not `.gitignore` or the README tool table/diagram — update those by hand.
