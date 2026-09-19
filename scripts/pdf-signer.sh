@@ -37,22 +37,12 @@ ok "system dependencies found"
 echo ""
 
 # ── Python virtual environment ───────────────────────────────
-# Persisted outside the repo (~/.pdf-signer-venv) so it survives across
-# runs and clones; only created once, but pip install still runs every
-# time to pick up dependency updates (it's a no-op when already current).
+# Persistent venv at ~/.pdf-signer-venv; see ensure_venv in common.sh.
 
 VENV_DIR="$HOME/.pdf-signer-venv"
-VENV_PIP="$VENV_DIR/bin/pip"
 VENV_PYTHON="$VENV_DIR/bin/python"
 
-if [ ! -d "$VENV_DIR" ]; then
-	python3 -m venv "$VENV_DIR"
-fi
-
-"$VENV_PIP" install --quiet --upgrade pip
-"$VENV_PIP" install --quiet pymupdf pytesseract pillow
-
-ok "Python environment ready"
+ensure_venv "$VENV_DIR" pymupdf pytesseract pillow
 
 echo ""
 

@@ -79,8 +79,8 @@ draw_progress() {
 
 # require_bin <binary> <apt-package> [label]
 # Simple "binary must exist or bail" dependency check. Only for the
-# single-binary case (pdfjam, gs) -- contrast-enhancer's multi-package
-# auto-install + venv bootstrap is different in kind and stays inline.
+# single-binary case (pdfjam, gs) -- the Python tools' multi-package apt
+# auto-install differs per tool and stays inline in each script.
 require_bin() {
     local bin="$1" apt_pkg="$2"
     local label="${3:-$bin}"
@@ -94,6 +94,20 @@ require_bin() {
         echo "" >&2
         exit 1
     fi
+}
+
+# ensure_venv <venv-dir> <pip-package>...
+# Creates the venv if missing, then runs pip install every time to pick up
+# dependency updates (a no-op when already current). Callers run the tool's
+# Python as "<venv-dir>/bin/python". The venv lives outside the repo (under
+# $HOME) so it survives across runs and clones.
+ensure_venv() {
+    local venv_dir="$1"
+    shift
+    [[ -d "$venv_dir" ]] || python3 -m venv "$venv_dir"
+    "$venv_dir/bin/pip" install --quiet --upgrade pip
+    "$venv_dir/bin/pip" install --quiet "$@"
+    ok "Python environment ready"
 }
 
 # prompt_input_file <prompt-text> [default-on-empty]
