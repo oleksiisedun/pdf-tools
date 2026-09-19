@@ -37,6 +37,7 @@ graph TD
 
   subgraph Scripts["scripts/"]
     Common["common.sh\n(shared helpers)"]
+  Py["py/\n(Python payloads)"]
     A5["pdf-a5-print.sh"]
     Compressor["pdf-compressor.sh"]
     Contrast["pdf-contrast-enhancer.sh"]
@@ -58,6 +59,8 @@ graph TD
 
   A5 --> Pdfjam[("pdfjam / texlive-extra-utils")]
   Compressor --> Ghostscript[("Ghostscript")]
+  Contrast --> Py
+  Signer --> Py
   Contrast --> Venv[("Python venv\npdf2image + pillow + img2pdf")]
   ToVideo --> Pdftoppm[("pdftoppm / poppler-utils")]
   ToVideo --> Ffmpeg[("ffmpeg")]
@@ -157,7 +160,7 @@ All tools share the same interaction style:
 
 ## Development
 
-There's no build system or automated test suite — this is plain bash plus small embedded Python scripts (in `pdf-contrast-enhancer.sh` and `pdf-signer.sh`). Verify a change by running the affected tool end-to-end:
+There's no build system or automated test suite — this is plain bash plus small Python scripts (in `scripts/py/`, run by `pdf-contrast-enhancer.sh` and `pdf-signer.sh`). Verify a change by running the affected tool end-to-end:
 
 ```bash
 ./pdf-tools.sh                    # interactive menu
@@ -171,4 +174,4 @@ For fast static checks that don't execute anything or need the PDF tools install
 ./check.sh
 ```
 
-This runs `bash -n` and `shellcheck` on every script, repo-specific convention checks (`checks/conventions.sh`), and a syntax + `ruff` pass over the Python embedded in the contrast-enhancer and signer heredocs (`checks/embedded-python.sh`). `shellcheck` (`sudo apt install shellcheck`) and `ruff` (`pip install ruff`) are optional locally — a missing one is skipped with a warning — but set `CI=1` to make a missing tool a failure.
+This runs `bash -n` and `shellcheck` on every script, repo-specific convention checks (`checks/conventions.sh`), and a syntax + `ruff` pass over `scripts/py/*.py` (`checks/python.sh`). `shellcheck` (`sudo apt install shellcheck`) and `ruff` (`pip install ruff`) are optional locally — a missing one is skipped with a warning — but set `CI=1` to make a missing tool a failure.
