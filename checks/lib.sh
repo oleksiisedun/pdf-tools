@@ -2,8 +2,8 @@
 # Shared setup for check.sh and checks/*.sh. Sourced, never executed directly.
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &>/dev/null && pwd)"
-# shellcheck source=../scripts/common.sh
-source "$ROOT/scripts/common.sh"
+# shellcheck source=../tools/common.sh
+source "$ROOT/tools/common.sh"
 cd "$ROOT" || exit 1
 
 failures=0

@@ -1,6 +1,6 @@
 # PDF-tools
 
-A collection of small interactive bash scripts for common PDF tasks. All scripts live in `scripts/` and share a common set of bash helpers (colored logging, drag-and-drop path cleanup, output-file prompts) via `scripts/common.sh`, so the tools stay consistent without duplicating the same prompt/logging logic across tools.
+A collection of small interactive bash scripts for common PDF tasks. All tools live in `tools/` and share a common set of bash helpers (colored logging, drag-and-drop path cleanup, output-file prompts) via `tools/common.sh`, so the tools stay consistent without duplicating the same prompt/logging logic across tools.
 
 ## Tools
 
@@ -29,13 +29,13 @@ With no arguments it shows an interactive menu of all tools; pick one, and after
 
 ## Architecture
 
-`pdf-tools.sh` is the top-level menu/dispatcher; each tool script it launches sources `scripts/common.sh` for its interactive prompts, logging, and progress-bar rendering, then shells out to its own external dependency to do the actual PDF work.
+`pdf-tools.sh` is the top-level menu/dispatcher; each tool script it launches sources `tools/common.sh` for its interactive prompts, logging, and progress-bar rendering, then shells out to its own external dependency to do the actual PDF work.
 
 ```mermaid
 graph TD
   Menu["pdf-tools.sh\n(entry point)"]
 
-  subgraph Scripts["scripts/"]
+  subgraph Tools["tools/"]
     Common["common.sh\n(shared helpers)"]
   Py["py/\n(Python payloads)"]
     A5["pdf-a5-print.sh"]
@@ -78,7 +78,7 @@ Combines two A5 PDFs side by side onto a single A4 landscape page. Requires `pdf
 
 ```bash
 sudo apt install texlive-extra-utils
-./scripts/pdf-a5-print.sh
+./tools/pdf-a5-print.sh
 ```
 
 Prompts for the first A5 PDF, the second A5 PDF (press Enter to reuse the first file), and an output file name (defaults to `output_A4_landscape.pdf`).
@@ -89,7 +89,7 @@ Compresses a PDF using Ghostscript, with a choice of three quality presets. Requ
 
 ```bash
 sudo apt install ghostscript
-./scripts/pdf-compressor.sh
+./tools/pdf-compressor.sh
 ```
 
 Prompts for the input PDF, a compression level, and an output file name (defaults to `<original-name>_compressed.pdf`).
@@ -108,7 +108,7 @@ Increases the contrast and sharpness of a PDF. Requires `python3`, `python3-venv
 
 ```bash
 sudo apt install python3 python3-venv poppler-utils
-./scripts/pdf-contrast-enhancer.sh
+./tools/pdf-contrast-enhancer.sh
 ```
 
 Missing packages are detected and installed automatically on first run. The script also creates a Python virtual environment at `~/.pdf-contrast-enhancer-venv` and installs the required Python packages (`pdf2image`, `pillow`, `img2pdf`) on first run.
@@ -128,7 +128,7 @@ Converts a PDF presentation into an MP4 slideshow video, showing each page for a
 
 ```bash
 sudo apt install poppler-utils ffmpeg
-./scripts/pdf-to-video.sh
+./tools/pdf-to-video.sh
 ```
 
 Prompts for the input PDF, seconds per slide (default: 5), and an output file name (defaults to `<original-name>_slideshow.mp4`).
@@ -141,7 +141,7 @@ OCRs a scanned PDF (no text layer needed) looking for a signer's printed name, t
 
 ```bash
 sudo apt install python3 python3-venv tesseract-ocr tesseract-ocr-ukr
-./scripts/pdf-signer.sh
+./tools/pdf-signer.sh
 ```
 
 Missing packages are detected and installed automatically on first run. The script also creates a Python virtual environment at `~/.pdf-signer-venv` and installs the required Python packages (`pymupdf`, `pytesseract`, `pillow`) on first run.
@@ -160,12 +160,12 @@ All tools share the same interaction style:
 
 ## Development
 
-There's no build system or automated test suite — this is plain bash plus small Python scripts (in `scripts/py/`, run by `pdf-contrast-enhancer.sh` and `pdf-signer.sh`). Verify a change by running the affected tool end-to-end:
+There's no build system or automated test suite — this is plain bash plus small Python scripts (in `tools/py/`, run by `pdf-contrast-enhancer.sh` and `pdf-signer.sh`). Verify a change by running the affected tool end-to-end:
 
 ```bash
 ./pdf-tools.sh                    # interactive menu
 ./pdf-tools.sh pdf-compressor     # jump straight to a tool by key
-./scripts/pdf-compressor.sh       # or run a tool standalone, bypassing the menu
+./tools/pdf-compressor.sh       # or run a tool standalone, bypassing the menu
 ```
 
 For fast static checks that don't execute anything or need the PDF tools installed:
@@ -174,4 +174,4 @@ For fast static checks that don't execute anything or need the PDF tools install
 ./check.sh
 ```
 
-This runs `bash -n` and `shellcheck` on every script, repo-specific convention checks (`checks/conventions.sh`), and a syntax + `ruff` pass over `scripts/py/*.py` (`checks/python.sh`). `shellcheck` (`sudo apt install shellcheck`) and `ruff` (`pip install ruff`) are optional locally — a missing one is skipped with a warning — but set `CI=1` to make a missing tool a failure.
+This runs `bash -n` and `shellcheck` on every script, repo-specific convention checks (`checks/conventions.sh`), and a syntax + `ruff` pass over `tools/py/*.py` (`checks/python.sh`). `shellcheck` (`sudo apt install shellcheck`) and `ruff` (`pip install ruff`) are optional locally — a missing one is skipped with a warning — but set `CI=1` to make a missing tool a failure.

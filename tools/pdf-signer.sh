@@ -108,7 +108,7 @@ HEIGHT=$(prompt_number "Signature height, in points (default: 48): " 48 '^[0-9]+
 SHIFT=$(prompt_number "Extra horizontal shift, in points, positive = further right (default: 0): " 0 '^-?[0-9]+(\.[0-9]+)?$')
 
 # ── Run ───────────────────────────────────────────────────────
-# The signing logic lives in scripts/py/pdf-signer.py and runs through the
+# The signing logic lives in tools/py/pdf-signer.py and runs through the
 # venv's Python. Unlike the compressor/contrast-enhancer, there's no
 # meaningful total-page count to drive a progress bar (pages are searched
 # last-to-first until the name is found), so the Python side's own status

@@ -57,7 +57,7 @@ DEFAULT_OUTPUT="${INPUT_BASENAME}_contrast.pdf"
 OUTPUT=$(prompt_output_path "$DEFAULT_OUTPUT")
 
 # ── Run ───────────────────────────────────────────────────────
-# The enhancement logic lives in scripts/py/pdf-contrast-enhancer.py and runs
+# The enhancement logic lives in tools/py/pdf-contrast-enhancer.py and runs
 # through the venv's Python; it reports progress by printing
 # "PROGRESS:i/total" lines that the bash loop below parses the same way
 # pdf-compressor.sh parses Ghostscript's page-progress output.

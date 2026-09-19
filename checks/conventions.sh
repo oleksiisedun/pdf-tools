@@ -6,15 +6,15 @@ set -uo pipefail
 # shellcheck source=lib.sh
 source "$(dirname -- "${BASH_SOURCE[0]}")/lib.sh"
 
-tool_scripts=(scripts/pdf-*.sh)
+tool_scripts=(tools/pdf-*.sh)
 entry_scripts=(pdf-tools.sh "${tool_scripts[@]}")
 
 # ok/warn/err must write to stderr: prompt_input_file/prompt_output_path
 # return their result on stdout through $(...), so status text on stdout
 # would corrupt the returned path.
 for fn in ok warn err; do
-    grep -Eq "^${fn}\\(\\)[[:space:]]*\\{.*>&2;?[[:space:]]*\\}" scripts/common.sh ||
-        fail "scripts/common.sh: $fn() must write to stderr (>&2)"
+    grep -Eq "^${fn}\\(\\)[[:space:]]*\\{.*>&2;?[[:space:]]*\\}" tools/common.sh ||
+        fail "tools/common.sh: $fn() must write to stderr (>&2)"
 done
 
 for f in "${entry_scripts[@]}"; do
@@ -31,7 +31,7 @@ done
 
 # Dispatcher: TOOL_KEYS, TOOL_LABELS and TOOL_SCRIPTS are parallel arrays.
 mapfile -t keys < <(sed -n 's/^TOOL_KEYS=(\(.*\))$/\1/p' pdf-tools.sh | tr ' ' '\n')
-mapfile -t registered < <(sed -n '/^TOOL_SCRIPTS=(/,/^)/p' pdf-tools.sh | grep -o 'scripts/[^"]*\.sh')
+mapfile -t registered < <(sed -n '/^TOOL_SCRIPTS=(/,/^)/p' pdf-tools.sh | grep -o 'tools/[^"]*\.sh')
 label_count=$(sed -n '/^TOOL_LABELS=(/,/^)/p' pdf-tools.sh | grep -c '^ *"')
 
 if ((${#keys[@]} == 0 || ${#registered[@]} == 0)); then
@@ -40,7 +40,7 @@ elif ((${#keys[@]} != ${#registered[@]} || ${#registered[@]} != label_count)); t
     fail "pdf-tools.sh: TOOL_KEYS (${#keys[@]}), TOOL_LABELS ($label_count) and TOOL_SCRIPTS (${#registered[@]}) differ in length"
 else
     for i in "${!keys[@]}"; do
-        [[ "${registered[$i]}" == "scripts/${keys[$i]}.sh" ]] ||
+        [[ "${registered[$i]}" == "tools/${keys[$i]}.sh" ]] ||
             fail "pdf-tools.sh: TOOL_KEYS[$i] '${keys[$i]}' doesn't match TOOL_SCRIPTS[$i] '${registered[$i]}'"
     done
 fi
@@ -49,13 +49,13 @@ for f in "${tool_scripts[@]}"; do
     printf '%s\n' "${registered[@]}" | grep -qx "$f" || fail "$f: not registered in pdf-tools.sh"
 done
 
-# Python payloads live in scripts/py/pdf-<name>.py next to their owning
-# scripts/pdf-<name>.sh, never in heredocs (which no linter looks inside).
-for py in scripts/py/*.py; do
-    [[ -f "scripts/$(basename "$py" .py).sh" ]] || fail "$py: no matching scripts/$(basename "$py" .py).sh"
+# Python payloads live in tools/py/pdf-<name>.py next to their owning
+# tools/pdf-<name>.sh, never in heredocs (which no linter looks inside).
+for py in tools/py/*.py; do
+    [[ -f "tools/$(basename "$py" .py).sh" ]] || fail "$py: no matching tools/$(basename "$py" .py).sh"
 done
-for f in scripts/*.sh; do
-    ! grep -q "<< 'PYEOF'" "$f" || fail "$f: embedded Python heredoc -- move it to scripts/py/"
+for f in tools/*.sh; do
+    ! grep -q "<< 'PYEOF'" "$f" || fail "$f: embedded Python heredoc -- move it to tools/py/"
 done
 
 ((failures == 0)) || exit 1

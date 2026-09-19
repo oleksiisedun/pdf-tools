@@ -1,12 +1,12 @@
 #!/bin/bash
-# Lints the tool payloads in scripts/py/*.py. Syntax is always checked; ruff
+# Lints the tool payloads in tools/py/*.py. Syntax is always checked; ruff
 # (errors and pyflakes only: undefined names, unused imports) runs if installed.
 
 set -uo pipefail
 # shellcheck source=lib.sh
 source "$(dirname -- "${BASH_SOURCE[0]}")/lib.sh"
 
-py_files=(scripts/py/*.py)
+py_files=(tools/py/*.py)
 
 have_ruff=0
 optional_bin ruff "pip install ruff" && have_ruff=1

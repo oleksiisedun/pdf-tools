@@ -7,7 +7,7 @@ set -uo pipefail
 # shellcheck source=checks/lib.sh
 source "$(dirname -- "${BASH_SOURCE[0]}")/checks/lib.sh"
 
-sh_files=(pdf-tools.sh check.sh scripts/*.sh checks/*.sh)
+sh_files=(pdf-tools.sh check.sh tools/*.sh checks/*.sh)
 
 echo "==> bash -n"
 for f in "${sh_files[@]}"; do

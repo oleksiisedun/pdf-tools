@@ -12,7 +12,7 @@
 set -eo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" &>/dev/null && pwd)"
-source "$SCRIPT_DIR/scripts/common.sh"
+source "$SCRIPT_DIR/tools/common.sh"
 
 TOOL_KEYS=(pdf-a5-print pdf-compressor pdf-contrast-enhancer pdf-to-video pdf-signer)
 TOOL_LABELS=(
@@ -23,11 +23,11 @@ TOOL_LABELS=(
     "Stamp a signature image next to a signer's name in a scanned PDF"
 )
 TOOL_SCRIPTS=(
-    "$SCRIPT_DIR/scripts/pdf-a5-print.sh"
-    "$SCRIPT_DIR/scripts/pdf-compressor.sh"
-    "$SCRIPT_DIR/scripts/pdf-contrast-enhancer.sh"
-    "$SCRIPT_DIR/scripts/pdf-to-video.sh"
-    "$SCRIPT_DIR/scripts/pdf-signer.sh"
+    "$SCRIPT_DIR/tools/pdf-a5-print.sh"
+    "$SCRIPT_DIR/tools/pdf-compressor.sh"
+    "$SCRIPT_DIR/tools/pdf-contrast-enhancer.sh"
+    "$SCRIPT_DIR/tools/pdf-to-video.sh"
+    "$SCRIPT_DIR/tools/pdf-signer.sh"
 )
 
 print_usage() {
