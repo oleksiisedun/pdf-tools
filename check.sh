@@ -22,8 +22,8 @@ fi
 echo "==> conventions"
 checks/conventions.sh || failures=$((failures + 1))
 
-echo "==> embedded Python"
-checks/embedded-python.sh || failures=$((failures + 1))
+echo "==> Python"
+checks/python.sh || failures=$((failures + 1))
 
 echo ""
 if ((failures > 0)); then

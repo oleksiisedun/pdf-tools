@@ -49,4 +49,13 @@ for f in "${tool_scripts[@]}"; do
     printf '%s\n' "${registered[@]}" | grep -qx "$f" || fail "$f: not registered in pdf-tools.sh"
 done
 
+# Python payloads live in scripts/py/pdf-<name>.py next to their owning
+# scripts/pdf-<name>.sh, never in heredocs (which no linter looks inside).
+for py in scripts/py/*.py; do
+    [[ -f "scripts/$(basename "$py" .py).sh" ]] || fail "$py: no matching scripts/$(basename "$py" .py).sh"
+done
+for f in scripts/*.sh; do
+    ! grep -q "<< 'PYEOF'" "$f" || fail "$f: embedded Python heredoc -- move it to scripts/py/"
+done
+
 ((failures == 0)) || exit 1
