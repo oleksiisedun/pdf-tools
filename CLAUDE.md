@@ -19,7 +19,7 @@ Run `./check.sh` after every edit — it's the single entry point for the static
 - `checks/conventions.sh` — enforces the rules below: `ok`/`warn`/`err` write to stderr, every entry script has `#!/bin/bash` + `set -eo pipefail` + the executable bit, every tool script sources `common.sh` and fails via `dump_log_and_die` (no inline `cat "$LOGFILE"`), and `TOOL_KEYS`/`TOOL_LABELS`/`TOOL_SCRIPTS` in `pdf-tools.sh` are equal length, aligned (`TOOL_KEYS[i]` == script basename) and cover every `tools/pdf-*.sh`; every `tools/py/X.py` has a matching `tools/X.sh`, and no `<< 'PYEOF'` heredocs remain (Python goes in `tools/py/`, where linters can see it).
 - `checks/python.sh` — syntax check plus `ruff --select E9,F` (undefined names, unused imports) on every `tools/py/*.py`.
 
-`check.sh` and `checks/*.sh` share `checks/lib.sh` (sources `common.sh`, `fail`, `optional_bin`). It still doesn't replace running a tool end-to-end for behavioral changes.
+`check.sh` and `checks/*.sh` share `checks/check-helpers.sh` (sources `common.sh`, `fail`, `optional_bin`). It still doesn't replace running a tool end-to-end for behavioral changes.
 
 Each tool declares its own external dependency and checks for it at startup (`require_bin` in `pdf-a5-print.sh`/`pdf-compressor.sh`/`pdf-to-video.sh`; a manual apt-check block in `pdf-contrast-enhancer.sh`/`pdf-signer.sh`). Install the relevant package before testing a tool:
 

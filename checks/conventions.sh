@@ -3,8 +3,8 @@
 # stderr status helpers, script boilerplate, and dispatcher registration.
 
 set -uo pipefail
-# shellcheck source=lib.sh
-source "$(dirname -- "${BASH_SOURCE[0]}")/lib.sh"
+# shellcheck source=check-helpers.sh
+source "$(dirname -- "${BASH_SOURCE[0]}")/check-helpers.sh"
 
 tool_scripts=(tools/pdf-*.sh)
 entry_scripts=(pdf-tools.sh "${tool_scripts[@]}")

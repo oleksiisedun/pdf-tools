@@ -4,8 +4,8 @@
 # (shellcheck, ruff) a failure instead of a skipped check.
 
 set -uo pipefail
-# shellcheck source=checks/lib.sh
-source "$(dirname -- "${BASH_SOURCE[0]}")/checks/lib.sh"
+# shellcheck source=checks/check-helpers.sh
+source "$(dirname -- "${BASH_SOURCE[0]}")/checks/check-helpers.sh"
 
 sh_files=(pdf-tools.sh check.sh tools/*.sh checks/*.sh)
 

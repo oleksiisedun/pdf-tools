@@ -3,8 +3,8 @@
 # (errors and pyflakes only: undefined names, unused imports) runs if installed.
 
 set -uo pipefail
-# shellcheck source=lib.sh
-source "$(dirname -- "${BASH_SOURCE[0]}")/lib.sh"
+# shellcheck source=check-helpers.sh
+source "$(dirname -- "${BASH_SOURCE[0]}")/check-helpers.sh"
 
 py_files=(tools/py/*.py)
 
