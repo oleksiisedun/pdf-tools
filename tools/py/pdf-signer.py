@@ -27,7 +27,14 @@ def find_name_box(
     page where the words of `name_parts` appear next to each other (matched
     by prefix, so Ukrainian case endings like СЕДУН / СЕДУНУ / СЕДУНА still
     match), or None if not found."""
-    data = _ocr_words(page, dpi)
+    return match_name_box(_ocr_words(page, dpi), name_parts, dpi)
+
+
+def match_name_box(
+    data: dict[str, list], name_parts: list[str], dpi: int = OCR_DPI
+) -> Box | None:
+    """Pure matching half of `find_name_box`: `data` is pytesseract's
+    image_to_data dict (pixel coordinates at `dpi`), `name_parts` upper-case."""
     scale = 72.0 / dpi
     lines: dict[tuple[int, int, int], list[Word]] = {}
     for i in range(len(data["text"])):
@@ -73,6 +80,25 @@ def locate_signer(doc: pymupdf.Document, signer_name: str) -> tuple[int, Box] | 
     return None
 
 
+def signature_rect(
+    name_box: Box,
+    image_size: tuple[int, int],
+    *,
+    gap: float,
+    height: float,
+    shift: float,
+) -> Box:
+    """Rect (PDF points) for the signature: `height` tall, width following the
+    image's aspect ratio, right edge `gap` (minus `shift`) left of the name box,
+    vertically centered on it."""
+    nx0, ny0, _, ny1 = name_box
+    img_w, img_h = image_size
+    x1 = nx0 - gap + shift
+    x0 = x1 - height * img_w / img_h
+    y_center = (ny0 + ny1) / 2
+    return (x0, y_center - height / 2, x1, y_center + height / 2)
+
+
 def stamp(
     input_pdf: Path,
     signature_png: Path,
@@ -87,20 +113,15 @@ def stamp(
         located = locate_signer(doc, signer_name)
         if located is None:
             raise RuntimeError(f"Ім'я «{signer_name}» не знайдено на жодній сторінці.")
-        page_index, (nx0, ny0, _, ny1) = located
+        page_index, name_box = located
 
         with Image.open(signature_png) as sig_img:
-            ratio = sig_img.width / sig_img.height
-        sig_w = height * ratio
-
-        x1 = nx0 - gap + shift
-        x0 = x1 - sig_w
-        y_center = (ny0 + ny1) / 2
-        y0 = y_center - height / 2
-        y1 = y_center + height / 2
+            rect = signature_rect(
+                name_box, sig_img.size, gap=gap, height=height, shift=shift
+            )
 
         doc[page_index].insert_image(
-            pymupdf.Rect(x0, y0, x1, y1),
+            pymupdf.Rect(*rect),
             filename=str(signature_png),
             keep_proportion=True,
         )
