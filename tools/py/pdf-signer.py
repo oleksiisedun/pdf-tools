@@ -79,9 +79,9 @@ def stamp(
     signer_name: str,
     output_pdf: Path,
     *,
-    gap: float = 10.0,
-    height: float = 48.0,
-    shift: float = 0.0,
+    gap: float,
+    height: float,
+    shift: float,
 ) -> None:
     with pymupdf.open(input_pdf) as doc:
         located = locate_signer(doc, signer_name)
@@ -136,9 +136,10 @@ if __name__ == "__main__":
     ap.add_argument("signer_name")
     ap.add_argument("--input", required=True, type=Path)
     ap.add_argument("--output", required=True, type=Path)
-    ap.add_argument("--gap", type=float, default=10.0)
-    ap.add_argument("--height", type=float, default=48.0)
-    ap.add_argument("--shift", type=float, default=0.0)
+    # No defaults: tools/pdf-signer.sh owns them (DEFAULT_GAP etc.).
+    ap.add_argument("--gap", required=True, type=float)
+    ap.add_argument("--height", required=True, type=float)
+    ap.add_argument("--shift", required=True, type=float)
     args = ap.parse_args()
 
     placement = {"gap": args.gap, "height": args.height, "shift": args.shift}

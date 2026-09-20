@@ -100,9 +100,14 @@ fi
 echo ""
 
 # ── Option: placement tuning ──────────────────────────────────
-GAP=$(prompt_number "Gap between signature and name, in points (default: 10): " 10 '^-?[0-9]+(\.[0-9]+)?$')
-HEIGHT=$(prompt_number "Signature height, in points (default: 48): " 48 '^[0-9]+(\.[0-9]+)?$')
-SHIFT=$(prompt_number "Extra horizontal shift, in points, positive = further right (default: 0): " 0 '^-?[0-9]+(\.[0-9]+)?$')
+# These are the only place the defaults live: the Python side requires all three.
+DEFAULT_GAP=10
+DEFAULT_HEIGHT=48
+DEFAULT_SHIFT=0
+
+GAP=$(prompt_number "Gap between signature and name, in points (default: $DEFAULT_GAP): " "$DEFAULT_GAP" '^-?[0-9]+(\.[0-9]+)?$')
+HEIGHT=$(prompt_number "Signature height, in points (default: $DEFAULT_HEIGHT): " "$DEFAULT_HEIGHT" '^[0-9]+(\.[0-9]+)?$')
+SHIFT=$(prompt_number "Extra horizontal shift, in points, positive = further right (default: $DEFAULT_SHIFT): " "$DEFAULT_SHIFT" '^-?[0-9]+(\.[0-9]+)?$')
 
 # ── Run ───────────────────────────────────────────────────────
 # The signing logic lives in tools/py/pdf-signer.py and runs through the
