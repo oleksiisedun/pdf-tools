@@ -7,7 +7,7 @@ set -uo pipefail
 source "$(dirname -- "${BASH_SOURCE[0]}")/check-helpers.sh"
 
 tool_scripts=(tools/pdf-*.sh)
-entry_scripts=(pdf-tools.sh "${tool_scripts[@]}")
+entry_scripts=(pdf-tools.sh test.sh "${tool_scripts[@]}")
 
 # ok/warn/err must write to stderr: prompt_input_file/prompt_output_path
 # return their result on stdout through $(...), so status text on stdout

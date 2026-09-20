@@ -179,7 +179,16 @@ For fast static checks that don't execute anything or need the PDF tools install
 ./check.sh
 ```
 
-This runs `bash -n`, `shellcheck` and `shfmt -d` on every script, repo-specific convention checks (`checks/conventions.sh`), and a syntax + `ruff` (lint and format) + `pyright` pass over `tools/py/*.py` (`checks/python.sh`). `shellcheck` and `shfmt` (`sudo apt install shellcheck shfmt`) and `ruff` and `pyright` (`pip install ruff pyright`) are optional locally — a missing one is skipped with a warning — but set `CI=1` to make a missing tool a failure. Fix formatting with `shfmt -w` and `ruff format tools/py`.
+This runs `bash -n`, `shellcheck` and `shfmt -d` on every script, repo-specific convention checks (`checks/conventions.sh`), and a syntax + `ruff` (lint and format) + `pyright` pass over `tools/py/*.py` and `tests/py/*.py` (`checks/python.sh`). `shellcheck` and `shfmt` (`sudo apt install shellcheck shfmt`) and `ruff` and `pyright` (`pip install ruff pyright`) are optional locally — a missing one is skipped with a warning — but set `CI=1` to make a missing tool a failure. Fix formatting with `shfmt -w` and `ruff format tools/py tests/py`.
+
+Unit tests for the signer's pure logic (name matching, signature placement, batch handling) live in `tests/py/` and run with:
+
+```bash
+./test.sh                # all tests
+./test.sh -k locate -x   # extra arguments go to pytest
+```
+
+`test.sh` runs pytest in the signer's venv (`~/.pdf-signer-venv`) and installs pytest there the first time; it needs `python3`, `python3-venv` and network access only for that first run. Tesseract isn't needed, since the tests use fake OCR data.
 
 ### Adding a tool
 

@@ -5,7 +5,7 @@
 select = ["E", "F", "I", "B", "UP", "SIM"]
 
 [tool.pyright]
-include = ["tools/py"]
+include = ["tools/py", "tests/py"]
 # The tool venvs live under $HOME, not next to the repo, so third-party
 # imports don't resolve here; the checks still cover our own code.
 reportMissingImports = false

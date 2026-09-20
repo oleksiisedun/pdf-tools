@@ -5,3 +5,5 @@
 *_signed/
 output_A4_landscape.pdf
 *.log
+__pycache__/
+.pytest_cache/

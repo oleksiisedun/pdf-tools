@@ -1,10 +1,10 @@
 ## What this is
 
-A collection of small interactive bash scripts for common PDF tasks (A5→A4 imposition, Ghostscript compression, contrast/sharpness enhancement, PDF-to-slideshow-video conversion, OCR-based signature stamping). No build system, no package manager, no automated test suite — everything is plain bash plus small Python scripts (`tools/py/`) for the contrast and signer tools.
+A collection of small interactive bash scripts for common PDF tasks (A5→A4 imposition, Ghostscript compression, contrast/sharpness enhancement, PDF-to-slideshow-video conversion, OCR-based signature stamping). No build system, no package manager — everything is plain bash plus small Python scripts (`tools/py/`) for the contrast and signer tools.
 
 ## Running / verifying changes
 
-There's no test suite. Verify a change by actually running the affected tool end-to-end:
+Verify a change by actually running the affected tool end-to-end:
 
 ```bash
 ./pdf-tools.sh                 # interactive menu
@@ -16,10 +16,12 @@ There's no test suite. Verify a change by actually running the affected tool end
 Run `./check.sh` after every edit — it's the single entry point for the static checks (fast, no network, doesn't execute any tool):
 
 - `bash -n`, `shellcheck -x` and `shfmt -d` (4-space indent, configured in `.editorconfig`; fix with `shfmt -w`) on every shell script. `shellcheck`, `shfmt`, `ruff` and `pyright` are optional locally (skipped with a warning if missing); `CI=1 ./check.sh` makes a missing tool a failure.
-- `checks/conventions.sh` — enforces the rules below: `ok`/`warn`/`err` write to stderr, every entry script has `#!/bin/bash` (deliberately not `#!/usr/bin/env bash` as in the global shell conventions) + `set -eo pipefail` + the executable bit, every tool script sources `common.sh` and fails via `dump_log_and_die` (no inline `cat "$LOGFILE"`) and gets its logfile from `init_logfile` (no bare `LOGFILE=$(mktemp)`, except `pdf-to-video.sh`, which keeps it in its scratch dir), and `TOOL_KEYS`/`TOOL_LABELS`/`TOOL_SCRIPTS` in `pdf-tools.sh` are equal length, aligned (`TOOL_KEYS[i]` == script basename) and cover every `tools/pdf-*.sh`; every `tools/py/X.py` has a matching `tools/X.sh`, and no `<< 'PYEOF'` heredocs remain (Python goes in `tools/py/`, where linters can see it).
-- `checks/python.sh` — syntax check, `ruff check` (rule set and line length from `pyproject.toml`), `ruff format --check` and `pyright` on every `tools/py/*.py`. `pyright` runs with unresolved third-party imports ignored (the tool venvs live under `$HOME`), so it checks our own code, not the libraries' types.
+- `checks/conventions.sh` — enforces the rules below: `ok`/`warn`/`err` write to stderr, every entry script (`pdf-tools.sh`, `test.sh`, the tools) has `#!/bin/bash` (deliberately not `#!/usr/bin/env bash` as in the global shell conventions) + `set -eo pipefail` + the executable bit, every tool script sources `common.sh` and fails via `dump_log_and_die` (no inline `cat "$LOGFILE"`) and gets its logfile from `init_logfile` (no bare `LOGFILE=$(mktemp)`, except `pdf-to-video.sh`, which keeps it in its scratch dir), and `TOOL_KEYS`/`TOOL_LABELS`/`TOOL_SCRIPTS` in `pdf-tools.sh` are equal length, aligned (`TOOL_KEYS[i]` == script basename) and cover every `tools/pdf-*.sh`; every `tools/py/X.py` has a matching `tools/X.sh`, and no `<< 'PYEOF'` heredocs remain (Python goes in `tools/py/`, where linters can see it).
+- `checks/python.sh` — syntax check, `ruff check` (rule set and line length from `pyproject.toml`), `ruff format --check` and `pyright` on every `tools/py/*.py` and `tests/py/*.py`. `pyright` runs with unresolved third-party imports ignored (the tool venvs live under `$HOME`), so it checks our own code, not the libraries' types.
 
 `check.sh` and `checks/*.sh` share `checks/check-helpers.sh` (sources `common.sh`, `fail`, `optional_bin`). It still doesn't replace running a tool end-to-end for behavioral changes.
+
+Unit tests (pytest) cover the pure logic in `tools/py/pdf-signer.py` (`match_name_box`, `signature_rect`, `locate_signer`, `batch`) in `tests/py/`. Run them with `./test.sh` (extra args go to pytest, e.g. `./test.sh -k locate`): it runs pytest in the signer's venv (`SIGNER_VENV_DIR`/`SIGNER_PACKAGES` in `tools/common.sh`, shared with `pdf-signer.sh`) and installs pytest there on first use, touching pip only when something is missing. The tests are deliberately not part of `check.sh` (which stays dependency-free and network-free), but `checks/python.sh` lints and type-checks them. OCR (`_ocr_words`) and PDF I/O (`stamp`) are not unit-tested; run the tool for those. When adding Python logic to a tool, keep the pure part separate from OCR/PDF calls so it can be tested with fake data.
 
 Each tool declares its own external dependency and checks for it at startup (`require_bin` in `pdf-a5-print.sh`/`pdf-compressor.sh`/`pdf-to-video.sh`; a per-tool missing-package check feeding `apt_install_missing` in `pdf-contrast-enhancer.sh`/`pdf-signer.sh`). Install the relevant package before testing a tool:
 
