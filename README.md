@@ -7,7 +7,7 @@ A collection of small interactive bash scripts for common PDF tasks. All tools l
 | Tool | What it does |
 |------|---------------|
 | [pdf-a5-print](#pdf-a5-print) | Combines two A5 PDFs side by side onto a single A4 landscape page |
-| [pdf-compressor](#pdf-compressor) | Compresses a PDF with Ghostscript, with a choice of three quality presets |
+| [pdf-compressor](#pdf-compressor) | Compresses a PDF with Ghostscript, using a quality preset or a target file size in MB |
 | [pdf-contrast-enhancer](#pdf-contrast-enhancer) | Increases the contrast and sharpness of a scanned/photographed PDF |
 | [pdf-to-video](#pdf-to-video) | Converts a PDF presentation into an MP4 slideshow video, one fixed-duration slide per page |
 | [pdf-signer](#pdf-signer) | OCRs a scanned PDF for a signer's printed name and stamps a signature image next to it |
@@ -87,7 +87,7 @@ Prompts for the first A5 PDF, the second A5 PDF (press Enter to reuse the first 
 
 ### pdf-compressor
 
-Compresses a PDF using Ghostscript, with a choice of three quality presets. Requires `ghostscript`:
+Compresses a PDF using Ghostscript, with a choice of three quality presets or a target file size. Requires `ghostscript`:
 
 ```bash
 sudo apt install ghostscript
@@ -101,6 +101,9 @@ Prompts for the input PDF, a compression level, and an output file name (default
 | 1 | `screen`   |  72 | Smallest file, lowest quality   |
 | 2 | `ebook`    | 150 | Moderate quality *(default)*    |
 | 3 | `prepress` | 300 | Highest quality, larger file    |
+| 4 | `target`   | 30–300 | Highest quality that fits a size you enter (MB) |
+
+With option 4 the tool binary-searches the highest image DPI whose result is at most the target size, running Ghostscript several times (each pass shows its own progress bar and resulting size). Only images are downsampled, so a text/vector-heavy PDF may not reach a small target; in that case the smallest result (30 dpi) is kept with a warning. If the input is already under the target, nothing is written.
 
 Compression results vary depending on the source material — some PDFs may not shrink significantly.
 
