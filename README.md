@@ -176,7 +176,7 @@ For fast static checks that don't execute anything or need the PDF tools install
 ./check.sh
 ```
 
-This runs `bash -n` and `shellcheck` on every script, repo-specific convention checks (`checks/conventions.sh`), and a syntax + `ruff` pass over `tools/py/*.py` (`checks/python.sh`). `shellcheck` (`sudo apt install shellcheck`) and `ruff` (`pip install ruff`) are optional locally — a missing one is skipped with a warning — but set `CI=1` to make a missing tool a failure.
+This runs `bash -n`, `shellcheck` and `shfmt -d` on every script, repo-specific convention checks (`checks/conventions.sh`), and a syntax + `ruff` (lint and format) + `pyright` pass over `tools/py/*.py` (`checks/python.sh`). `shellcheck` and `shfmt` (`sudo apt install shellcheck shfmt`) and `ruff` and `pyright` (`pip install ruff pyright`) are optional locally — a missing one is skipped with a warning — but set `CI=1` to make a missing tool a failure. Fix formatting with `shfmt -w` and `ruff format tools/py`.
 
 ### Adding a tool
 

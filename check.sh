@@ -1,7 +1,7 @@
 #!/bin/bash
 # Runs every static check (no network, no PDF tools needed) and exits
 # non-zero if any fail. Set CI=1 to make missing optional tools
-# (shellcheck, ruff) a failure instead of a skipped check.
+# (shellcheck, shfmt, ruff, pyright) a failure instead of a skipped check.
 
 set -uo pipefail
 # shellcheck source=checks/check-helpers.sh
@@ -17,6 +17,11 @@ done
 echo "==> shellcheck"
 if optional_bin shellcheck "sudo apt install shellcheck"; then
     shellcheck -x --source-path=SCRIPTDIR "${sh_files[@]}" || fail "shellcheck reported issues"
+fi
+
+echo "==> shfmt"
+if optional_bin shfmt "sudo apt install shfmt"; then
+    shfmt -d "${sh_files[@]}" || fail "shfmt: run 'shfmt -w' on the files above"
 fi
 
 echo "==> conventions"
