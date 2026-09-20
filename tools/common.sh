@@ -6,6 +6,13 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
+# The signer's Python environment, shared by tools/pdf-signer.sh and test.sh
+# (the unit tests import the same packages).
+# shellcheck disable=SC2034 # used by the scripts that source this file
+SIGNER_VENV_DIR="$HOME/.pdf-signer-venv"
+# shellcheck disable=SC2034 # used by the scripts that source this file
+SIGNER_PACKAGES=(pymupdf pytesseract pillow)
+
 # ok/warn/err write to stderr (not stdout) because prompt_output_path() below
 # is called via command substitution ($(...)); if these wrote to stdout their
 # text would get captured into the caller's return value instead of the path.

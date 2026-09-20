@@ -34,12 +34,12 @@ ok "system dependencies found"
 echo ""
 
 # ── Python virtual environment ───────────────────────────────
-# Persistent venv at ~/.pdf-signer-venv; see ensure_venv in common.sh.
+# Persistent venv at ~/.pdf-signer-venv (SIGNER_VENV_DIR); see ensure_venv in
+# common.sh.
 
-VENV_DIR="$HOME/.pdf-signer-venv"
-VENV_PYTHON="$VENV_DIR/bin/python"
+VENV_PYTHON="$SIGNER_VENV_DIR/bin/python"
 
-ensure_venv "$VENV_DIR" pymupdf pytesseract pillow
+ensure_venv "$SIGNER_VENV_DIR" "${SIGNER_PACKAGES[@]}"
 
 echo ""
 
