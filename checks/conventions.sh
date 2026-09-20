@@ -26,6 +26,8 @@ done
 for f in "${tool_scripts[@]}"; do
     grep -qF "source \"\$SCRIPT_DIR/common.sh\"" "$f" || fail "$f: must source common.sh"
     grep -q 'dump_log_and_die' "$f" || fail "$f: failure branch must call dump_log_and_die"
+    # pdf-to-video.sh keeps its logfile inside its own scratch dir (see init_logfile).
+    grep -qE '^LOGFILE=\$\(mktemp' "$f" && fail "$f: use init_logfile instead of a bare LOGFILE=\$(mktemp)"
     grep -qF "cat \"\$LOGFILE\"" "$f" && fail "$f: inline 'cat \$LOGFILE' -- use dump_log_and_die"
 done
 
