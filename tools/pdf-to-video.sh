@@ -41,23 +41,25 @@ OUTPUT=$(prompt_output_path "$DEFAULT_OUTPUT" "mp4")
 
 # ── Run ───────────────────────────────────────────────────────
 
-TMPDIR=$(mktemp -d)
-trap 'rm -rf "$TMPDIR"' EXIT
-LOGFILE=$(mktemp)
+# Not named TMPDIR: that's the variable mktemp itself reads. LOGFILE lives in
+# the scratch dir so this one EXIT trap cleans up both (see init_logfile).
+WORK_DIR=$(mktemp -d)
+trap 'rm -rf "$WORK_DIR"' EXIT
+LOGFILE="$WORK_DIR/ffmpeg.log"
 
 echo ""
 
 TOTAL_PAGES=$(pdfinfo "$INPUT" | awk '/^Pages:/{print $2}')
 
-if ! pdftoppm -png -r 150 "$INPUT" "$TMPDIR/slide" 2>"$LOGFILE"; then
+if ! pdftoppm -png -r 150 "$INPUT" "$WORK_DIR/slide" 2>"$LOGFILE"; then
     dump_log_and_die "Slide rendering" "$LOGFILE"
 fi
 
 # Build an ffmpeg concat-demuxer list. sort -V handles pdftoppm's
 # page-count-dependent zero-padding (slide-1.png vs slide-01.png) correctly.
-mapfile -t SLIDE_IMAGES < <(find "$TMPDIR" -maxdepth 1 -name 'slide-*.png' | sort -V)
+mapfile -t SLIDE_IMAGES < <(find "$WORK_DIR" -maxdepth 1 -name 'slide-*.png' | sort -V)
 
-CONCAT_FILE="$TMPDIR/concat.txt"
+CONCAT_FILE="$WORK_DIR/concat.txt"
 : >"$CONCAT_FILE"
 for img in "${SLIDE_IMAGES[@]}"; do
     printf "file '%s'\nduration %s\n" "$img" "$SECONDS_PER_SLIDE" >>"$CONCAT_FILE"
@@ -91,8 +93,6 @@ echo ""
 if [[ "$FFMPEG_EXIT" -ne 0 ]]; then
     dump_log_and_die "ffmpeg" "$LOGFILE"
 fi
-
-rm -f "$LOGFILE"
 
 # Comparing input PDF size to output video size isn't a meaningful metric
 # here, so report_size_comparison doesn't fit -- print a custom summary

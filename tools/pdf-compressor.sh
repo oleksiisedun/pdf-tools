@@ -65,7 +65,7 @@ OUTPUT=$(prompt_output_path "$DEFAULT_OUTPUT")
 
 # ── Run ───────────────────────────────────────────────────────
 
-LOGFILE=$(mktemp)
+init_logfile
 
 echo ""
 set +e
@@ -97,5 +97,3 @@ if [[ "$GS_EXIT" -ne 0 ]]; then
 fi
 
 report_size_comparison "$INPUT" "$OUTPUT"
-
-rm -f "$LOGFILE"

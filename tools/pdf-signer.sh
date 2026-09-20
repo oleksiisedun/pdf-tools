@@ -111,7 +111,7 @@ SHIFT=$(prompt_number "Extra horizontal shift, in points, positive = further rig
 # last-to-first until the name is found), so the Python side's own status
 # lines print straight through instead.
 
-LOGFILE=$(mktemp)
+init_logfile
 
 echo ""
 set +e
@@ -128,7 +128,5 @@ echo ""
 if [[ "$PYTHON_EXIT" -ne 0 ]]; then
     dump_log_and_die "Signing" "$LOGFILE"
 fi
-
-rm -f "$LOGFILE"
 
 report_size_comparison "$INPUT" "$OUTPUT"

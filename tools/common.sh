@@ -25,16 +25,25 @@ clean_path() {
     echo "$p"
 }
 
+# init_logfile
+# Sets LOGFILE to a fresh tempfile and removes it on any exit (success,
+# failure, or Ctrl-C). Every tool that captures an external command's output
+# calls this instead of a bare mktemp. Tools that install their own EXIT trap
+# (pdf-to-video.sh) place LOGFILE inside their scratch directory instead.
+init_logfile() {
+    LOGFILE=$(mktemp)
+    # shellcheck disable=SC2064 # LOGFILE is set once, expand it now
+    trap "rm -f '$LOGFILE'" EXIT
+}
+
 # dump_log_and_die <label> <logfile>
 # Prints "<label> failed. Full log:" followed by the logfile contents, then
-# removes the logfile and exits 1. Used by every tool that runs an external
-# command into a tempfile logfile.
+# exits 1. Used by every tool that runs an external command into a logfile.
 dump_log_and_die() {
     local label="$1" logfile="$2"
     err "$label failed. Full log:"
     echo ""
     cat "$logfile"
-    rm -f "$logfile"
     exit 1
 }
 

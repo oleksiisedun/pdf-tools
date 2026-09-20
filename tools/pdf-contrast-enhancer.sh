@@ -59,7 +59,7 @@ OUTPUT=$(prompt_output_path "$DEFAULT_OUTPUT")
 # "PROGRESS:i/total" lines that the bash loop below parses the same way
 # pdf-compressor.sh parses Ghostscript's page-progress output.
 
-LOGFILE=$(mktemp)
+init_logfile
 
 echo ""
 set +e
@@ -81,5 +81,3 @@ if [[ "$PYTHON_EXIT" -ne 0 ]]; then
 fi
 
 report_size_comparison "$INPUT" "$OUTPUT"
-
-rm -f "$LOGFILE"
