@@ -45,7 +45,7 @@ print_usage() {
 # returns 1 if there's no match.
 resolve_tool() {
     local query="$1" i
-    if [[ "$query" =~ ^[0-9]+$ ]] && (( query >= 1 && query <= ${#TOOL_KEYS[@]} )); then
+    if [[ "$query" =~ ^[0-9]+$ ]] && ((query >= 1 && query <= ${#TOOL_KEYS[@]})); then
         echo "$((query - 1))"
         return 0
     fi

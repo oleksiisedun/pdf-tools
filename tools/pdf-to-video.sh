@@ -50,7 +50,7 @@ echo ""
 TOTAL_PAGES=$(pdfinfo "$INPUT" | awk '/^Pages:/{print $2}')
 
 if ! pdftoppm -png -r 150 "$INPUT" "$TMPDIR/slide" 2>"$LOGFILE"; then
-	dump_log_and_die "Slide rendering" "$LOGFILE"
+    dump_log_and_die "Slide rendering" "$LOGFILE"
 fi
 
 # Build an ffmpeg concat-demuxer list. sort -V handles pdftoppm's
@@ -58,12 +58,12 @@ fi
 mapfile -t SLIDE_IMAGES < <(find "$TMPDIR" -maxdepth 1 -name 'slide-*.png' | sort -V)
 
 CONCAT_FILE="$TMPDIR/concat.txt"
-: > "$CONCAT_FILE"
+: >"$CONCAT_FILE"
 for img in "${SLIDE_IMAGES[@]}"; do
-	printf "file '%s'\nduration %s\n" "$img" "$SECONDS_PER_SLIDE" >> "$CONCAT_FILE"
+    printf "file '%s'\nduration %s\n" "$img" "$SECONDS_PER_SLIDE" >>"$CONCAT_FILE"
 done
 
-TOTAL_DURATION=$(( TOTAL_PAGES * SECONDS_PER_SLIDE ))
+TOTAL_DURATION=$((TOTAL_PAGES * SECONDS_PER_SLIDE))
 
 set +e
 
@@ -73,15 +73,15 @@ set +e
 # is read from PIPESTATUS[0] since $? after a pipeline reflects the
 # trailing `while` command, not ffmpeg itself.
 ffmpeg -y -f concat -safe 0 -i "$CONCAT_FILE" \
-	-vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,format=yuv420p" \
-	-r 25 -c:v libx264 -pix_fmt yuv420p -movflags +faststart \
-	-progress pipe:1 -nostats \
-	"$OUTPUT" 2>"$LOGFILE" | while IFS= read -r line; do
-	if [[ "$line" =~ ^out_time_ms=([0-9]+)$ ]]; then
-		CURRENT_SEC=$(( BASH_REMATCH[1] / 1000000 ))
-		(( CURRENT_SEC > TOTAL_DURATION )) && CURRENT_SEC=$TOTAL_DURATION
-		draw_progress "$CURRENT_SEC" "$TOTAL_DURATION" "sec"
-	fi
+    -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,format=yuv420p" \
+    -r 25 -c:v libx264 -pix_fmt yuv420p -movflags +faststart \
+    -progress pipe:1 -nostats \
+    "$OUTPUT" 2>"$LOGFILE" | while IFS= read -r line; do
+    if [[ "$line" =~ ^out_time_ms=([0-9]+)$ ]]; then
+        CURRENT_SEC=$((BASH_REMATCH[1] / 1000000))
+        ((CURRENT_SEC > TOTAL_DURATION)) && CURRENT_SEC=$TOTAL_DURATION
+        draw_progress "$CURRENT_SEC" "$TOTAL_DURATION" "sec"
+    fi
 done
 
 FFMPEG_EXIT="${PIPESTATUS[0]}"
@@ -89,7 +89,7 @@ set -e
 echo ""
 
 if [[ "$FFMPEG_EXIT" -ne 0 ]]; then
-	dump_log_and_die "ffmpeg" "$LOGFILE"
+    dump_log_and_die "ffmpeg" "$LOGFILE"
 fi
 
 rm -f "$LOGFILE"

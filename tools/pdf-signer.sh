@@ -22,14 +22,14 @@ source "$SCRIPT_DIR/common.sh"
 # just printing instructions and exiting.
 
 MISSING_APT=()
-command -v python3       >/dev/null 2>&1              || MISSING_APT+=(python3)
-python3 -c "import venv" 2>/dev/null                   || MISSING_APT+=(python3-venv)
-command -v tesseract     >/dev/null 2>&1               || MISSING_APT+=(tesseract-ocr)
-tesseract --list-langs 2>/dev/null | grep -qx ukr      || MISSING_APT+=(tesseract-ocr-ukr)
+command -v python3 >/dev/null 2>&1 || MISSING_APT+=(python3)
+python3 -c "import venv" 2>/dev/null || MISSING_APT+=(python3-venv)
+command -v tesseract >/dev/null 2>&1 || MISSING_APT+=(tesseract-ocr)
+tesseract --list-langs 2>/dev/null | grep -qx ukr || MISSING_APT+=(tesseract-ocr-ukr)
 
 if [ ${#MISSING_APT[@]} -gt 0 ]; then
-	warn "Installing missing packages: ${MISSING_APT[*]}"
-	sudo apt-get install -y "${MISSING_APT[@]}"
+    warn "Installing missing packages: ${MISSING_APT[*]}"
+    sudo apt-get install -y "${MISSING_APT[@]}"
 fi
 
 ok "system dependencies found"
@@ -55,8 +55,8 @@ echo ""
 # ── Input: signer name ────────────────────────────────────────
 SIGNER_NAME=""
 while [[ -z "$SIGNER_NAME" ]]; do
-	read -rp 'Enter signer'"'"'s full name (e.g. "Олексій Седун"): ' SIGNER_NAME
-	[[ -z "$SIGNER_NAME" ]] && err "Signer name cannot be empty."
+    read -rp 'Enter signer'"'"'s full name (e.g. "Олексій Седун"): ' SIGNER_NAME
+    [[ -z "$SIGNER_NAME" ]] && err "Signer name cannot be empty."
 done
 
 echo ""
@@ -66,17 +66,17 @@ echo ""
 # PDFs for batch signing, so the existence check is inline here rather
 # than in common.sh.
 prompt_input_path() {
-	local prompt="$1" result
-	while true; do
-		read -rp "$prompt" result
-		result=$(clean_path "$result")
-		if [[ -f "$result" || -d "$result" ]]; then
-			echo "$result"
-			return 0
-		else
-			err "Not found: $result"
-		fi
-	done
+    local prompt="$1" result
+    while true; do
+        read -rp "$prompt" result
+        result=$(clean_path "$result")
+        if [[ -f "$result" || -d "$result" ]]; then
+            echo "$result"
+            return 0
+        else
+            err "Not found: $result"
+        fi
+    done
 }
 
 INPUT=$(prompt_input_path "Enter path to input PDF or folder of PDFs: ")
@@ -90,14 +90,14 @@ echo ""
 # the target folder is created by the Python side (os.makedirs) instead.
 
 if [[ -d "$INPUT" ]]; then
-	DEFAULT_OUTPUT="${INPUT%/}_signed"
-	read -rp "Enter output folder [$DEFAULT_OUTPUT]: " OUTPUT
-	OUTPUT="${OUTPUT/#\~/$HOME}"
-	OUTPUT="${OUTPUT:-$DEFAULT_OUTPUT}"
+    DEFAULT_OUTPUT="${INPUT%/}_signed"
+    read -rp "Enter output folder [$DEFAULT_OUTPUT]: " OUTPUT
+    OUTPUT="${OUTPUT/#\~/$HOME}"
+    OUTPUT="${OUTPUT:-$DEFAULT_OUTPUT}"
 else
-	INPUT_BASENAME=$(basename "$INPUT" .pdf)
-	DEFAULT_OUTPUT="${INPUT_BASENAME}_signed.pdf"
-	OUTPUT=$(prompt_output_path "$DEFAULT_OUTPUT")
+    INPUT_BASENAME=$(basename "$INPUT" .pdf)
+    DEFAULT_OUTPUT="${INPUT_BASENAME}_signed.pdf"
+    OUTPUT=$(prompt_output_path "$DEFAULT_OUTPUT")
 fi
 
 echo ""
@@ -120,16 +120,16 @@ echo ""
 set +e
 
 "$VENV_PYTHON" "$SCRIPT_DIR/py/pdf-signer.py" "$SIGNATURE" "$SIGNER_NAME" \
-	--input "$INPUT" --output "$OUTPUT" \
-	--gap "$GAP" --height "$HEIGHT" --shift "$SHIFT" \
-	2>"$LOGFILE"
+    --input "$INPUT" --output "$OUTPUT" \
+    --gap "$GAP" --height "$HEIGHT" --shift "$SHIFT" \
+    2>"$LOGFILE"
 
 PYTHON_EXIT=$?
 set -e
 echo ""
 
 if [[ "$PYTHON_EXIT" -ne 0 ]]; then
-	dump_log_and_die "Signing" "$LOGFILE"
+    dump_log_and_die "Signing" "$LOGFILE"
 fi
 
 rm -f "$LOGFILE"

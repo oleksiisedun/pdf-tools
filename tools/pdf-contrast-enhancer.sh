@@ -20,13 +20,13 @@ source "$SCRIPT_DIR/common.sh"
 # instead of just printing instructions and exiting.
 
 MISSING_APT=()
-command -v python3        >/dev/null 2>&1 || MISSING_APT+=(python3)
-python3 -c "import venv"  2>/dev/null     || MISSING_APT+=(python3-venv)
-command -v pdftoppm       >/dev/null 2>&1 || MISSING_APT+=(poppler-utils)
+command -v python3 >/dev/null 2>&1 || MISSING_APT+=(python3)
+python3 -c "import venv" 2>/dev/null || MISSING_APT+=(python3-venv)
+command -v pdftoppm >/dev/null 2>&1 || MISSING_APT+=(poppler-utils)
 
 if [ ${#MISSING_APT[@]} -gt 0 ]; then
-	warn "Installing missing packages: ${MISSING_APT[*]}"
-	sudo apt-get install -y "${MISSING_APT[@]}"
+    warn "Installing missing packages: ${MISSING_APT[*]}"
+    sudo apt-get install -y "${MISSING_APT[@]}"
 fi
 
 ok "system dependencies found"
@@ -68,9 +68,9 @@ echo ""
 set +e
 
 "$VENV_PYTHON" "$SCRIPT_DIR/py/pdf-contrast-enhancer.py" "$INPUT" "$OUTPUT" 2>"$LOGFILE" | while IFS= read -r line; do
-	if [[ "$line" =~ ^PROGRESS:([0-9]+)/([0-9]+)$ ]]; then
-		draw_progress "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}"
-	fi
+    if [[ "$line" =~ ^PROGRESS:([0-9]+)/([0-9]+)$ ]]; then
+        draw_progress "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}"
+    fi
 done
 
 # PIPESTATUS[0] (not $?) because $? after a pipeline reflects the trailing
@@ -80,7 +80,7 @@ set -e
 echo ""
 
 if [[ "$PYTHON_EXIT" -ne 0 ]]; then
-	dump_log_and_die "Enhancement" "$LOGFILE"
+    dump_log_and_die "Enhancement" "$LOGFILE"
 fi
 
 report_size_comparison "$INPUT" "$OUTPUT"

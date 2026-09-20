@@ -9,16 +9,18 @@ NC='\033[0m'
 # ok/warn/err write to stderr (not stdout) because prompt_output_path() below
 # is called via command substitution ($(...)); if these wrote to stdout their
 # text would get captured into the caller's return value instead of the path.
-ok()   { echo -e "${GREEN}✔ $1${NC}" >&2; }
+ok() { echo -e "${GREEN}✔ $1${NC}" >&2; }
 warn() { echo -e "${YELLOW}⚠ $1${NC}" >&2; }
-err()  { echo -e "${RED}✘ $1${NC}" >&2; }
+err() { echo -e "${RED}✘ $1${NC}" >&2; }
 
 # Strip surrounding quotes and unescape spaces (from drag & drop)
 clean_path() {
     local p="$1"
     p="${p/#\~/$HOME}"
-    p="${p#\'}" ; p="${p%\'}"
-    p="${p#\"}" ; p="${p%\"}"
+    p="${p#\'}"
+    p="${p%\'}"
+    p="${p#\"}"
+    p="${p%\"}"
     p="${p//\\ / }"
     echo "$p"
 }
@@ -69,11 +71,11 @@ prompt_number() {
 
 draw_progress() {
     local current=$1 total=$2 label="${3:-page}" width=40
-    local percent=$(( current * 100 / total ))
-    local filled=$(( current * width / total ))
+    local percent=$((current * 100 / total))
+    local filled=$((current * width / total))
     local bar="" i
-    for ((i=0; i<filled; i++)); do bar+="█"; done
-    for ((i=filled; i<width; i++)); do bar+="░"; done
+    for ((i = 0; i < filled; i++)); do bar+="█"; done
+    for ((i = filled; i < width; i++)); do bar+="░"; done
     printf "\r  \033[0;32m[%s]\033[0m %3d%%  %s %d / %d" "$bar" "$percent" "$label" "$current" "$total"
 }
 
