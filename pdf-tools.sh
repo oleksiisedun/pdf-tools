@@ -30,15 +30,19 @@ TOOL_SCRIPTS=(
     "$SCRIPT_DIR/tools/pdf-signer.sh"
 )
 
+print_tool_list() {
+    local i
+    for i in "${!TOOL_KEYS[@]}"; do
+        printf "  %d) %-23s %s\n" "$((i + 1))" "${TOOL_KEYS[$i]}" "${TOOL_LABELS[$i]}"
+    done
+}
+
 print_usage() {
     echo "Usage: $(basename "$0") [tool]"
     echo ""
     echo "With no arguments, shows an interactive menu."
     echo "Available tools:"
-    local i
-    for i in "${!TOOL_KEYS[@]}"; do
-        printf "  %d) %-23s %s\n" "$((i + 1))" "${TOOL_KEYS[$i]}" "${TOOL_LABELS[$i]}"
-    done
+    print_tool_list
 }
 
 # resolve_tool <key-or-number> -- echoes the matching index (0-based), or
@@ -66,10 +70,7 @@ run_tool() {
 show_menu() {
     echo ""
     echo "Select a tool:"
-    local i
-    for i in "${!TOOL_KEYS[@]}"; do
-        printf "  %d) %-23s %s\n" "$((i + 1))" "${TOOL_KEYS[$i]}" "${TOOL_LABELS[$i]}"
-    done
+    print_tool_list
     echo "  q) Quit"
     echo ""
 }

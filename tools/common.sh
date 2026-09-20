@@ -81,8 +81,8 @@ draw_progress() {
 
 # require_bin <binary> <apt-package> [label]
 # Simple "binary must exist or bail" dependency check. Only for the
-# single-binary case (pdfjam, gs) -- the Python tools' multi-package apt
-# auto-install differs per tool and stays inline in each script.
+# single-binary case (pdfjam, gs) -- the Python tools detect their missing
+# packages inline and hand them to apt_install_missing instead.
 require_bin() {
     local bin="$1" apt_pkg="$2"
     local label="${3:-$bin}"
@@ -96,6 +96,15 @@ require_bin() {
         echo "" >&2
         exit 1
     fi
+}
+
+# apt_install_missing <apt-package>...
+# Installs the given packages via apt; a no-op when called with none, so
+# callers can pass their (possibly empty) missing-package array unconditionally.
+apt_install_missing() {
+    (($# > 0)) || return 0
+    warn "Installing missing packages: $*"
+    sudo apt-get install -y "$@"
 }
 
 # ensure_venv <venv-dir> <pip-package>...
@@ -134,15 +143,21 @@ prompt_input_file() {
     done
 }
 
+# ensure_extension <path> <extension>
+# Echoes the path with ".<extension>" appended unless it already ends with it.
+ensure_extension() {
+    local path="$1" ext="$2"
+    [[ "$path" == *."$ext" ]] || path="${path}.${ext}"
+    echo "$path"
+}
+
 # prompt_output_path <default-filename> [extension]
 # Prompts for an output filename, enforces the given extension (default:
 # pdf), loops on overwrite-confirmation if the target already exists.
 prompt_output_path() {
     local default="$1" ext="${2:-pdf}" output answer
     read -rp "Enter output file name [$default]: " output
-    output="${output/#\~/$HOME}"
-    output="${output:-$default}"
-    [[ "$output" != *."$ext" ]] && output="${output}.${ext}"
+    output=$(ensure_extension "$(clean_path "${output:-$default}")" "$ext")
 
     while [[ -f "$output" ]]; do
         warn "File already exists: $output"
@@ -151,11 +166,9 @@ prompt_output_path() {
             break
         elif [[ -z "$answer" || "$answer" =~ ^[Nn]$ ]]; then
             read -rp "Enter a new output file name: " output
-            output="${output/#\~/$HOME}"
-            [[ "$output" != *."$ext" ]] && output="${output}.${ext}"
+            output=$(ensure_extension "$(clean_path "$output")" "$ext")
         else
-            output=$(clean_path "$answer")
-            [[ "$output" != *."$ext" ]] && output="${output}.${ext}"
+            output=$(ensure_extension "$(clean_path "$answer")" "$ext")
         fi
     done
     echo "$output"

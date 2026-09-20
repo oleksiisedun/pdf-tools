@@ -24,10 +24,7 @@ command -v python3 >/dev/null 2>&1 || MISSING_APT+=(python3)
 python3 -c "import venv" 2>/dev/null || MISSING_APT+=(python3-venv)
 command -v pdftoppm >/dev/null 2>&1 || MISSING_APT+=(poppler-utils)
 
-if [ ${#MISSING_APT[@]} -gt 0 ]; then
-    warn "Installing missing packages: ${MISSING_APT[*]}"
-    sudo apt-get install -y "${MISSING_APT[@]}"
-fi
+apt_install_missing "${MISSING_APT[@]}"
 
 ok "system dependencies found"
 

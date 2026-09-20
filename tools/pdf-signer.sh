@@ -27,10 +27,7 @@ python3 -c "import venv" 2>/dev/null || MISSING_APT+=(python3-venv)
 command -v tesseract >/dev/null 2>&1 || MISSING_APT+=(tesseract-ocr)
 tesseract --list-langs 2>/dev/null | grep -qx ukr || MISSING_APT+=(tesseract-ocr-ukr)
 
-if [ ${#MISSING_APT[@]} -gt 0 ]; then
-    warn "Installing missing packages: ${MISSING_APT[*]}"
-    sudo apt-get install -y "${MISSING_APT[@]}"
-fi
+apt_install_missing "${MISSING_APT[@]}"
 
 ok "system dependencies found"
 
