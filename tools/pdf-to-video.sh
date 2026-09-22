@@ -55,9 +55,11 @@ if ! pdftoppm -png -r 150 "$INPUT" "$WORK_DIR/slide" 2>"$LOGFILE"; then
     dump_log_and_die "Slide rendering" "$LOGFILE"
 fi
 
-# Build an ffmpeg concat-demuxer list. sort -V handles pdftoppm's
-# page-count-dependent zero-padding (slide-1.png vs slide-01.png) correctly.
-mapfile -t SLIDE_IMAGES < <(find "$WORK_DIR" -maxdepth 1 -name 'slide-*.png' | sort -V)
+# Build an ffmpeg concat-demuxer list. NUL-delimited throughout so no
+# filename (however unlikely here) could be split wrong. sort -z -V handles
+# pdftoppm's page-count-dependent zero-padding (slide-1.png vs slide-01.png)
+# correctly.
+mapfile -d '' -t SLIDE_IMAGES < <(find "$WORK_DIR" -maxdepth 1 -name 'slide-*.png' -print0 | sort -z -V)
 
 CONCAT_FILE="$WORK_DIR/concat.txt"
 : >"$CONCAT_FILE"
