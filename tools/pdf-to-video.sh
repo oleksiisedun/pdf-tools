@@ -65,6 +65,10 @@ CONCAT_FILE="$WORK_DIR/concat.txt"
 for img in "${SLIDE_IMAGES[@]}"; do
     printf "file '%s'\nduration %s\n" "$img" "$SECONDS_PER_SLIDE" >>"$CONCAT_FILE"
 done
+# The concat demuxer has no "next" entry to time the last duration against,
+# so it drops it -- repeating the last image once more (no duration) is the
+# documented workaround (see the ffmpeg Slideshow wiki page).
+printf "file '%s'\n" "${SLIDE_IMAGES[-1]}" >>"$CONCAT_FILE"
 
 TOTAL_DURATION=$((TOTAL_PAGES * SECONDS_PER_SLIDE))
 
@@ -75,9 +79,15 @@ set +e
 # pdf-compressor.sh parses Ghostscript's page-progress output. FFMPEG_EXIT
 # is read from PIPESTATUS[0] since $? after a pipeline reflects the
 # trailing `while` command, not ffmpeg itself.
+#
+# The frame rate is forced via the "fps" video filter, not a top-level -r:
+# with a top-level -r, ffmpeg's constant-frame-rate resampling miscounts the
+# concat demuxer's per-file "duration" (confirmed by testing -- e.g. two
+# 2-second slides came out as ~6s instead of 4s); "fps" inside -vf converts
+# the concat-demuxer's variable-rate timing to CFR correctly instead.
 ffmpeg -y -f concat -safe 0 -i "$CONCAT_FILE" \
-    -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,format=yuv420p" \
-    -r 25 -c:v libx264 -pix_fmt yuv420p -movflags +faststart \
+    -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,format=yuv420p,fps=25" \
+    -c:v libx264 -pix_fmt yuv420p -movflags +faststart \
     -progress pipe:1 -nostats \
     "$OUTPUT" 2>"$LOGFILE" | while IFS= read -r line; do
     if [[ "$line" =~ ^out_time_ms=([0-9]+)$ ]]; then
