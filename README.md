@@ -165,7 +165,7 @@ All tools share the same interaction style:
 
 ## Development
 
-There's no build system or automated test suite — this is plain bash plus small Python scripts (in `tools/py/`, run by `pdf-contrast-enhancer.sh` and `pdf-signer.sh`). Verify a change by running the affected tool end-to-end:
+No build system or package manager — this is plain bash plus small Python scripts (in `tools/py/`, run by `pdf-contrast-enhancer.sh` and `pdf-signer.sh`); pytest covers the signer's pure logic (see below). Verify a change by running the affected tool end-to-end:
 
 ```bash
 ./pdf-tools.sh                    # interactive menu
@@ -179,7 +179,7 @@ For fast static checks that don't execute anything or need the PDF tools install
 ./check.sh
 ```
 
-This runs `bash -n`, `shellcheck` and `shfmt -d` on every script, repo-specific convention checks (`checks/conventions.sh`), and a syntax + `ruff` (lint and format) + `pyright` pass over `tools/py/*.py` and `tests/py/*.py` (`checks/python.sh`). `shellcheck` and `shfmt` (`sudo apt install shellcheck shfmt`) and `ruff` and `pyright` (`pip install ruff pyright`) are optional locally — a missing one is skipped with a warning — but set `CI=1` to make a missing tool a failure. Fix formatting with `shfmt -w` and `ruff format tools/py tests/py`.
+This runs `bash -n`, `shellcheck` and `shfmt -d` on every script, repo-specific convention checks (`checks/conventions.sh`), and a syntax + `ruff` (lint and format) + `pyright` pass over `tools/py/*.py` and `tests/py/*.py` (`checks/python.sh`). `shellcheck` and `shfmt` (`sudo apt install shellcheck shfmt`) and `ruff` and `pyright` (`pip install ruff pyright`) are optional locally — a missing one is skipped with a warning — but set `CI=1` to make a missing tool a failure. Fix formatting with `shfmt -w` and `ruff format tools/py tests/py`. (These dev-only tools are installed with plain `pip`, not `uv` — there's no project package or lockfile to manage here, just two linters.)
 
 Unit tests for the signer's pure logic (name matching, signature placement, batch handling) live in `tests/py/` and run with:
 
