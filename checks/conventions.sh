@@ -20,7 +20,7 @@ done
 for f in "${entry_scripts[@]}"; do
     [[ -x "$f" ]] || fail "$f: not executable"
     [[ "$(head -n1 "$f")" == "#!/bin/bash" ]] || fail "$f: first line must be #!/bin/bash"
-    grep -q '^set -eo pipefail' "$f" || fail "$f: missing 'set -eo pipefail'"
+    grep -q '^set -euo pipefail' "$f" || fail "$f: missing 'set -euo pipefail'"
 done
 
 for f in "${tool_scripts[@]}"; do

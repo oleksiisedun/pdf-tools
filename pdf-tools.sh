@@ -9,7 +9,7 @@
 #    ./pdf-tools.sh -h|--help       show usage
 # ============================================================
 
-set -eo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" &>/dev/null && pwd)"
 source "$SCRIPT_DIR/tools/common.sh"

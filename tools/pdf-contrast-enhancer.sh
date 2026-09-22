@@ -9,7 +9,7 @@
 #  (installed automatically below if missing)
 # ============================================================
 
-set -eo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" &>/dev/null && pwd)"
 source "$SCRIPT_DIR/common.sh"
