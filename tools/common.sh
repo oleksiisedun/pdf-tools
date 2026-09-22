@@ -114,6 +114,14 @@ require_bin() {
     fi
 }
 
+# python_venv_apt_pkgs
+# Echoes "python3" and/or "python3-venv" (one per line), whichever the system
+# is missing. Callers do: MISSING_APT+=($(python_venv_apt_pkgs))
+python_venv_apt_pkgs() {
+    command -v python3 >/dev/null 2>&1 || echo python3
+    python3 -c "import venv" 2>/dev/null || echo "python3-venv"
+}
+
 # apt_install_missing <apt-package>...
 # Installs the given packages via apt; a no-op when called with none, so
 # callers can pass their (possibly empty) missing-package array unconditionally.
@@ -165,6 +173,14 @@ ensure_extension() {
     local path="$1" ext="$2"
     [[ "$path" == *."$ext" ]] || path="${path}.${ext}"
     echo "$path"
+}
+
+# default_output_name <input-pdf> <suffix> [extension]
+# Echoes "<input-basename>_<suffix>.<extension>" (extension default: pdf),
+# the default output filename every tool offers next to its input.
+default_output_name() {
+    local input="$1" suffix="$2" ext="${3:-pdf}"
+    echo "$(basename "$input" .pdf)_${suffix}.${ext}"
 }
 
 # prompt_output_path <default-filename> [extension]

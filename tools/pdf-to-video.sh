@@ -34,8 +34,7 @@ echo ""
 
 # ── Input: Output file ────────────────────────────────────────
 
-INPUT_BASENAME=$(basename "$INPUT" .pdf)
-DEFAULT_OUTPUT="${INPUT_BASENAME}_slideshow.mp4"
+DEFAULT_OUTPUT=$(default_output_name "$INPUT" slideshow mp4)
 
 OUTPUT=$(prompt_output_path "$DEFAULT_OUTPUT" "mp4")
 

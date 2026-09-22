@@ -19,9 +19,7 @@ source "$SCRIPT_DIR/common.sh"
 # apt packages plus a Python venv, so it auto-installs what's missing
 # instead of just printing instructions and exiting.
 
-MISSING_APT=()
-command -v python3 >/dev/null 2>&1 || MISSING_APT+=(python3)
-python3 -c "import venv" 2>/dev/null || MISSING_APT+=(python3-venv)
+mapfile -t MISSING_APT < <(python_venv_apt_pkgs)
 command -v pdftoppm >/dev/null 2>&1 || MISSING_APT+=(poppler-utils)
 
 apt_install_missing "${MISSING_APT[@]}"
@@ -48,8 +46,7 @@ ok "Input: $INPUT"
 
 echo ""
 
-INPUT_BASENAME=$(basename "$INPUT" .pdf)
-DEFAULT_OUTPUT="${INPUT_BASENAME}_contrast.pdf"
+DEFAULT_OUTPUT=$(default_output_name "$INPUT" contrast)
 
 OUTPUT=$(prompt_output_path "$DEFAULT_OUTPUT")
 

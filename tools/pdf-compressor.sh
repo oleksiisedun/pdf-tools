@@ -163,8 +163,7 @@ echo ""
 
 # ── Input: Output file ────────────────────────────────────────
 
-INPUT_BASENAME=$(basename "$INPUT" .pdf)
-DEFAULT_OUTPUT="${INPUT_BASENAME}_compressed.pdf"
+DEFAULT_OUTPUT=$(default_output_name "$INPUT" compressed)
 
 OUTPUT=$(prompt_output_path "$DEFAULT_OUTPUT")
 

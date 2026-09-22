@@ -21,9 +21,7 @@ source "$SCRIPT_DIR/common.sh"
 # packages plus a Python venv, so missing pieces are installed instead of
 # just printing instructions and exiting.
 
-MISSING_APT=()
-command -v python3 >/dev/null 2>&1 || MISSING_APT+=(python3)
-python3 -c "import venv" 2>/dev/null || MISSING_APT+=(python3-venv)
+mapfile -t MISSING_APT < <(python_venv_apt_pkgs)
 command -v tesseract >/dev/null 2>&1 || MISSING_APT+=(tesseract-ocr)
 tesseract --list-langs 2>/dev/null | grep -qx ukr || MISSING_APT+=(tesseract-ocr-ukr)
 
@@ -92,8 +90,7 @@ if [[ -d "$INPUT" ]]; then
     OUTPUT="${OUTPUT/#\~/$HOME}"
     OUTPUT="${OUTPUT:-$DEFAULT_OUTPUT}"
 else
-    INPUT_BASENAME=$(basename "$INPUT" .pdf)
-    DEFAULT_OUTPUT="${INPUT_BASENAME}_signed.pdf"
+    DEFAULT_OUTPUT=$(default_output_name "$INPUT" signed)
     OUTPUT=$(prompt_output_path "$DEFAULT_OUTPUT")
 fi
 
