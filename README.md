@@ -190,6 +190,15 @@ Unit tests for the signer's pure logic (name matching, signature placement, batc
 
 `test.sh` runs pytest in the signer's venv (`~/.pdf-signer-venv`) and installs pytest there the first time; it needs `python3`, `python3-venv` and network access only for that first run. Tesseract isn't needed, since the tests use fake OCR data.
 
+Unit tests for pure bash logic (`clean_path`, `ensure_extension`, `default_output_name`, `resolve_tool`, `format_mb`) live in `tests/bash/` and run with [bats-core](https://github.com/bats-core/bats-core) (`sudo apt install bats`):
+
+```bash
+./test-bash.sh                  # all tests
+./test-bash.sh -f resolve_tool  # extra arguments go to bats
+```
+
+These tests `source` the owning script directly; `pdf-tools.sh` and `pdf-compressor.sh` guard their interactive body behind `if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then ... fi` so sourcing them defines the functions without running the menu or prompting for input.
+
 ### Adding a tool
 
 1. Create `tools/pdf-<name>.sh`, sourcing `common.sh` (see an existing tool for the dependency check → prompts → run shape). Python payloads go in `tools/py/pdf-<name>.py`, not heredocs.

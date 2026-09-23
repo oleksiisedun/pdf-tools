@@ -13,15 +13,6 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" &>/dev/null && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
-# ── Dependency check ─────────────────────────────────────────
-require_bin gs ghostscript ghostscript
-
-echo ""
-
-# ── Input: PDF file ───────────────────────────────────────────
-INPUT=$(prompt_input_file "Enter path to input PDF: ")
-ok "Input: $INPUT"
-
 MIN_DPI=30
 MAX_DPI=300
 DPI_TOLERANCE=10 # stop the search once the DPI window is this narrow
@@ -113,76 +104,89 @@ compress_to_target() {
     ok "Best fit: $best_dpi dpi"
 }
 
-# ── Select compression quality ────────────────────────────────
+# Guarded so tests/bash/*.bats can `source` this file to exercise format_mb()
+# without running the CLI itself (which would block on the input-file prompt).
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    # ── Dependency check ─────────────────────────────────────────
+    require_bin gs ghostscript ghostscript
 
-echo ""
-echo "Select compression level:"
-echo "  1) screen   —  72 dpi  (smallest file)"
-echo "  2) ebook    — 150 dpi  (moderate quality)"
-echo "  3) prepress — 300 dpi  (highest quality)"
-echo "  4) target   — best quality that fits a file size you enter (MB)"
-echo ""
+    echo ""
 
-while true; do
-    read -rp "Choice [1/2/3/4] (default: 2): " CHOICE
-    CHOICE="${CHOICE:-2}"
-    case "$CHOICE" in
-    1)
-        PDFSETTINGS="/screen"
-        QUALITY_LABEL="screen (72 dpi)"
-        break
-        ;;
-    2)
-        PDFSETTINGS="/ebook"
-        QUALITY_LABEL="ebook (150 dpi)"
-        break
-        ;;
-    3)
-        PDFSETTINGS="/prepress"
-        QUALITY_LABEL="prepress (300 dpi)"
-        break
-        ;;
-    4)
-        PDFSETTINGS=""
-        QUALITY_LABEL="target file size"
-        break
-        ;;
-    *) err "Invalid choice. Enter 1, 2, 3, or 4." ;;
-    esac
-done
+    # ── Input: PDF file ───────────────────────────────────────────
+    INPUT=$(prompt_input_file "Enter path to input PDF: ")
+    ok "Input: $INPUT"
 
-ok "Quality: $QUALITY_LABEL"
+    # ── Select compression quality ────────────────────────────────
 
-if [[ -z "$PDFSETTINGS" ]]; then
-    TARGET_MB=$(prompt_number "Target file size in MB (e.g. 5 or 2.5): " "" \
-        '^([1-9][0-9]*(\.[0-9]+)?|0\.[0-9]*[1-9][0-9]*)$' "Enter a positive number, e.g. 5 or 2.5.")
-    TARGET_BYTES=$(awk -v mb="$TARGET_MB" 'BEGIN { printf "%d", mb * 1048576 }')
-    ok "Target: $TARGET_MB MB"
+    echo ""
+    echo "Select compression level:"
+    echo "  1) screen   —  72 dpi  (smallest file)"
+    echo "  2) ebook    — 150 dpi  (moderate quality)"
+    echo "  3) prepress — 300 dpi  (highest quality)"
+    echo "  4) target   — best quality that fits a file size you enter (MB)"
+    echo ""
+
+    while true; do
+        read -rp "Choice [1/2/3/4] (default: 2): " CHOICE
+        CHOICE="${CHOICE:-2}"
+        case "$CHOICE" in
+        1)
+            PDFSETTINGS="/screen"
+            QUALITY_LABEL="screen (72 dpi)"
+            break
+            ;;
+        2)
+            PDFSETTINGS="/ebook"
+            QUALITY_LABEL="ebook (150 dpi)"
+            break
+            ;;
+        3)
+            PDFSETTINGS="/prepress"
+            QUALITY_LABEL="prepress (300 dpi)"
+            break
+            ;;
+        4)
+            PDFSETTINGS=""
+            QUALITY_LABEL="target file size"
+            break
+            ;;
+        *) err "Invalid choice. Enter 1, 2, 3, or 4." ;;
+        esac
+    done
+
+    ok "Quality: $QUALITY_LABEL"
+
+    if [[ -z "$PDFSETTINGS" ]]; then
+        TARGET_MB=$(prompt_number "Target file size in MB (e.g. 5 or 2.5): " "" \
+            '^([1-9][0-9]*(\.[0-9]+)?|0\.[0-9]*[1-9][0-9]*)$' "Enter a positive number, e.g. 5 or 2.5.")
+        TARGET_BYTES=$(awk -v mb="$TARGET_MB" 'BEGIN { printf "%d", mb * 1048576 }')
+        ok "Target: $TARGET_MB MB"
+    fi
+    echo ""
+
+    # ── Input: Output file ────────────────────────────────────────
+
+    DEFAULT_OUTPUT=$(default_output_name "$INPUT" compressed)
+
+    OUTPUT=$(prompt_output_path "$DEFAULT_OUTPUT")
+
+    # ── Run ───────────────────────────────────────────────────────
+
+    init_logfile
+    CANDIDATE=$(mktemp) # scratch output for target-size attempts
+    # shellcheck disable=SC2064 # both paths are set once, expand them now
+    trap "rm -f '$LOGFILE' '$CANDIDATE'" EXIT
+
+    echo ""
+
+    if [[ -n "$PDFSETTINGS" ]]; then
+        run_gs "$OUTPUT" -dPDFSETTINGS="$PDFSETTINGS"
+    elif (($(stat -c %s "$INPUT") <= TARGET_BYTES)); then
+        warn "Input is already $(format_mb "$(stat -c %s "$INPUT")"), within the $TARGET_MB MB target. Nothing to do."
+        exit 0
+    else
+        compress_to_target "$OUTPUT" "$TARGET_BYTES"
+    fi
+
+    report_size_comparison "$INPUT" "$OUTPUT"
 fi
-echo ""
-
-# ── Input: Output file ────────────────────────────────────────
-
-DEFAULT_OUTPUT=$(default_output_name "$INPUT" compressed)
-
-OUTPUT=$(prompt_output_path "$DEFAULT_OUTPUT")
-
-# ── Run ───────────────────────────────────────────────────────
-
-init_logfile
-CANDIDATE=$(mktemp) # scratch output for target-size attempts
-# shellcheck disable=SC2064 # both paths are set once, expand them now
-trap "rm -f '$LOGFILE' '$CANDIDATE'" EXIT
-
-echo ""
-
-if [[ -n "$PDFSETTINGS" ]]; then
-    run_gs "$OUTPUT" -dPDFSETTINGS="$PDFSETTINGS"
-elif (($(stat -c %s "$INPUT") <= TARGET_BYTES)); then
-    warn "Input is already $(format_mb "$(stat -c %s "$INPUT")"), within the $TARGET_MB MB target. Nothing to do."
-    exit 0
-else
-    compress_to_target "$OUTPUT" "$TARGET_BYTES"
-fi
-
-report_size_comparison "$INPUT" "$OUTPUT"

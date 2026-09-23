@@ -75,35 +75,39 @@ show_menu() {
     echo ""
 }
 
-if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
-    print_usage
-    exit 0
-fi
-
-if [[ -n "${1:-}" ]]; then
-    if idx=$(resolve_tool "$1"); then
-        run_tool "$idx"
-        exit $?
-    else
-        err "Unknown tool: $1"
-        echo ""
+# Guarded so tests/bash/*.bats can `source` this file to exercise
+# resolve_tool() etc. without running the CLI itself.
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
         print_usage
-        exit 1
+        exit 0
     fi
-fi
 
-while true; do
-    show_menu
-    read -rp "Choice: " CHOICE
-    if [[ "$CHOICE" =~ ^[Qq]$ ]]; then
-        break
+    if [[ -n "${1:-}" ]]; then
+        if idx=$(resolve_tool "$1"); then
+            run_tool "$idx"
+            exit $?
+        else
+            err "Unknown tool: $1"
+            echo ""
+            print_usage
+            exit 1
+        fi
     fi
-    if idx=$(resolve_tool "$CHOICE"); then
-        echo ""
-        set +e
-        run_tool "$idx"
-        set -e
-    else
-        err "Invalid choice: $CHOICE"
-    fi
-done
+
+    while true; do
+        show_menu
+        read -rp "Choice: " CHOICE
+        if [[ "$CHOICE" =~ ^[Qq]$ ]]; then
+            break
+        fi
+        if idx=$(resolve_tool "$CHOICE"); then
+            echo ""
+            set +e
+            run_tool "$idx"
+            set -e
+        else
+            err "Invalid choice: $CHOICE"
+        fi
+    done
+fi
