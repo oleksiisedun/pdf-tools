@@ -54,6 +54,14 @@ dump_log_and_die() {
     exit 1
 }
 
+# print_done <output-file>
+# Prints the standard "Done! Output saved to: ..." success line. Used
+# directly by tools with no single meaningful size comparison
+# (pdf-a5-print.sh, pdf-to-video.sh) and by report_size_comparison below.
+print_done() {
+    ok "Done! Output saved to: $(realpath "$1")"
+}
+
 # report_size_comparison <input-file> <output-file>
 # Prints the standard "Done!" success message plus an input/output size
 # comparison. Used by tools that transform a PDF in place (compressor,
@@ -63,7 +71,7 @@ report_size_comparison() {
     local input_size output_size
     input_size=$(du -sh "$input" | cut -f1)
     output_size=$(du -sh "$output" | cut -f1)
-    ok "Done! Output saved to: $(realpath "$output")"
+    print_done "$output"
     echo ""
     echo "  Input size:  $input_size"
     echo "  Output size: $output_size"

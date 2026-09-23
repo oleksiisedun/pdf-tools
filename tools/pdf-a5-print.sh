@@ -46,7 +46,7 @@ trap 'kill -TERM -- -"$PDFJAM_PID" 2>/dev/null; exit 130' INT TERM
 
 if wait "$PDFJAM_PID"; then
     trap - INT TERM
-    ok "Done! Output saved to: $(realpath "$OUTPUT")"
+    print_done "$OUTPUT"
 else
     trap - INT TERM
     dump_log_and_die "pdfjam" "$LOGFILE"

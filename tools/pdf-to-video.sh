@@ -108,7 +108,7 @@ fi
 # Comparing input PDF size to output video size isn't a meaningful metric
 # here, so report_size_comparison doesn't fit -- print a custom summary
 # instead, same rationale as pdf-a5-print.sh's own "Done!" line.
-ok "Done! Output saved to: $(realpath "$OUTPUT")"
+print_done "$OUTPUT"
 echo ""
 echo "  Slides:   $TOTAL_PAGES"
 echo "  Duration: ${TOTAL_DURATION}s"

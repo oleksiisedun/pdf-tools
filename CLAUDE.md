@@ -54,7 +54,8 @@ Sourced (never executed) by every tool script. Provides:
 - `draw_progress` — renders an in-place ASCII progress bar (`\r` + fixed width). Callers parse tool-specific progress markers out of a subprocess's output stream and feed a current/total count to this function (see below). Takes an optional `[label]` argument (default `page`) so non-page units like `pdf-to-video.sh`'s `sec` can reuse it.
 - `init_logfile` — sets `LOGFILE` to a fresh `mktemp` file and installs an `EXIT` trap that removes it (success, failure or Ctrl-C). Every tool that captures an external command's output calls this instead of a bare `mktemp`; `pdf-to-video.sh` instead puts `LOGFILE` inside its scratch dir.
 - `dump_log_and_die` — prints `"<label> failed. Full log:"`, cats the tool's logfile, and exits 1 (the `init_logfile` trap does the cleanup). Every tool calls this from its failure branch instead of repeating the cat/exit sequence inline.
-- `report_size_comparison` — prints the `"Done! Output saved to: ..."` success message plus input/output file sizes (via `du -sh`). Used by tools that transform a PDF in place (compressor, contrast-enhancer); `pdf-a5-print.sh` prints its own "Done!" line directly since combining two inputs into one output has no single size comparison to report.
+- `print_done` — prints the `"Done! Output saved to: ..."` success line. Used directly by tools with no single meaningful size comparison (`pdf-a5-print.sh`, `pdf-to-video.sh`) and by `report_size_comparison` below.
+- `report_size_comparison` — calls `print_done` then prints input/output file sizes (via `du -sh`). Used by tools that transform a PDF in place (compressor, contrast-enhancer).
 
 ### Per-tool scripts
 
