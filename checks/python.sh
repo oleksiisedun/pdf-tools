@@ -1,5 +1,6 @@
 #!/bin/bash
-# Lints the tool payloads in tools/py/*.py and their tests in tests/py/*.py.
+# Lints the tool payloads in tools/py/*.py, their tests in tests/py/*.py and the
+# e2e fixture builder in tests/e2e/*.py.
 # Syntax is always checked; ruff (rules and line length from pyproject.toml,
 # plus formatting) and pyright run if installed.
 
@@ -7,7 +8,7 @@ set -uo pipefail
 # shellcheck source=check-helpers.sh
 source "$(dirname -- "${BASH_SOURCE[0]}")/check-helpers.sh"
 
-py_files=(tools/py/*.py tests/py/*.py)
+py_files=(tools/py/*.py tests/py/*.py tests/e2e/*.py)
 
 have_ruff=0
 optional_bin ruff "pip install ruff" && have_ruff=1
@@ -21,7 +22,7 @@ done
 
 if ((have_ruff)); then
     ruff check --quiet --no-cache "${py_files[@]}" || fail "ruff reported issues"
-    ruff format --check --quiet --no-cache "${py_files[@]}" || fail "ruff format: run 'ruff format tools/py tests/py'"
+    ruff format --check --quiet --no-cache "${py_files[@]}" || fail "ruff format: run 'ruff format tools/py tests/py tests/e2e'"
 fi
 
 if ((have_pyright)); then
