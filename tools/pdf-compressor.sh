@@ -64,6 +64,40 @@ run_gs_at_dpi() {
         -dDownsampleMonoImages=true -dMonoImageResolution="$dpi" -dMonoImageDownsampleThreshold=1.0
 }
 
+# search_best_dpi <fits-command>
+# Binary-searches MIN_DPI+1..MAX_DPI for the highest DPI for which
+# "<fits-command> <dpi>" succeeds, stopping once the window is narrower than
+# DPI_TOLERANCE. Sets BEST_DPI (MIN_DPI if nothing in the window fits).
+search_best_dpi() {
+    local fits_fn="$1" lo=$((MIN_DPI + 1)) hi=$MAX_DPI mid
+    BEST_DPI=$MIN_DPI
+    while ((hi - lo >= DPI_TOLERANCE)); do
+        mid=$(((lo + hi) / 2))
+        if "$fits_fn" "$mid"; then
+            BEST_DPI=$mid
+            lo=$((mid + 1))
+        else
+            hi=$((mid - 1))
+        fi
+    done
+}
+
+# dpi_fits <dpi> -- one attempt into $CANDIDATE; on a fit, moves it over $output
+# (compress_to_target's output, via TARGET_OUTPUT) and returns 0.
+dpi_fits() {
+    local dpi="$1" size
+    echo "  Trying $dpi dpi..."
+    run_gs_at_dpi "$CANDIDATE" "$dpi"
+    size=$(stat -c %s "$CANDIDATE")
+    if ((size <= TARGET_BYTES_LIMIT)); then
+        echo "  → $(format_mb "$size") (fits)"
+        mv "$CANDIDATE" "$TARGET_OUTPUT"
+        return 0
+    fi
+    echo "  → $(format_mb "$size") (too big)"
+    return 1
+}
+
 # compress_to_target <output> <target-bytes>
 # Finds the highest image DPI (MIN_DPI..MAX_DPI) whose result is at most
 # <target-bytes> and leaves that result in <output>. Tries MIN_DPI first: if
@@ -72,7 +106,9 @@ run_gs_at_dpi() {
 # Otherwise it binary-searches upward, writing each attempt to a scratch file
 # and moving it over <output> only when it fits.
 compress_to_target() {
-    local output="$1" target="$2" lo hi mid size best_dpi
+    local output="$1" target="$2" size
+    TARGET_OUTPUT="$output"
+    TARGET_BYTES_LIMIT="$target"
 
     echo "  Trying $MIN_DPI dpi (smallest possible)..."
     run_gs_at_dpi "$output" "$MIN_DPI"
@@ -83,25 +119,8 @@ compress_to_target() {
         return 0
     fi
 
-    best_dpi=$MIN_DPI
-    lo=$((MIN_DPI + 1))
-    hi=$MAX_DPI
-    while ((hi - lo >= DPI_TOLERANCE)); do
-        mid=$(((lo + hi) / 2))
-        echo "  Trying $mid dpi..."
-        run_gs_at_dpi "$CANDIDATE" "$mid"
-        size=$(stat -c %s "$CANDIDATE")
-        if ((size <= target)); then
-            echo "  → $(format_mb "$size") (fits)"
-            mv "$CANDIDATE" "$output"
-            best_dpi=$mid
-            lo=$((mid + 1))
-        else
-            echo "  → $(format_mb "$size") (too big)"
-            hi=$((mid - 1))
-        fi
-    done
-    ok "Best fit: $best_dpi dpi"
+    search_best_dpi dpi_fits
+    ok "Best fit: $BEST_DPI dpi"
 }
 
 # Guarded so tests/bash/*.bats can `source` this file to exercise format_mb()
