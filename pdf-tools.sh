@@ -14,13 +14,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" &>/dev/null && pwd)"
 source "$SCRIPT_DIR/tools/common.sh"
 
-TOOL_KEYS=(pdf-a5-print pdf-compressor pdf-contrast-enhancer pdf-to-video pdf-signer)
+TOOL_KEYS=(pdf-a5-print pdf-compressor pdf-contrast-enhancer pdf-to-video pdf-signer pdf-print-marks)
 TOOL_LABELS=(
     "Combine two A5 PDFs onto one A4 landscape page"
     "Compress a PDF with Ghostscript"
     "Increase PDF contrast and sharpness"
     "Convert a PDF presentation to a slideshow video"
     "Stamp a signature image next to a signer's name in a scanned PDF"
+    "Add print-only punctuation marks after ALL-CAPS surnames in a scanned PDF"
 )
 TOOL_SCRIPTS=(
     "$SCRIPT_DIR/tools/pdf-a5-print.sh"
@@ -28,6 +29,7 @@ TOOL_SCRIPTS=(
     "$SCRIPT_DIR/tools/pdf-contrast-enhancer.sh"
     "$SCRIPT_DIR/tools/pdf-to-video.sh"
     "$SCRIPT_DIR/tools/pdf-signer.sh"
+    "$SCRIPT_DIR/tools/pdf-print-marks.sh"
 )
 
 print_tool_list() {
