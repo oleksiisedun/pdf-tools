@@ -165,6 +165,20 @@ ensure_venv() {
     ok "Python environment ready"
 }
 
+# ensure_ocr_env
+# The dependency check + venv setup shared by the OCR tools (signer,
+# print-marks): installs missing python/tesseract apt packages, then readies
+# the signer venv. Callers run "$SIGNER_VENV_DIR/bin/python" afterwards.
+ensure_ocr_env() {
+    local -a missing_apt
+    mapfile -t missing_apt < <(python_venv_apt_pkgs)
+    mapfile -t -O "${#missing_apt[@]}" missing_apt < <(ocr_apt_pkgs)
+    apt_install_missing "${missing_apt[@]}"
+    ok "system dependencies found"
+    echo ""
+    ensure_venv "$SIGNER_VENV_DIR" "${SIGNER_PACKAGES[@]}"
+}
+
 # prompt_input_file <prompt-text> [default-on-empty]
 # Loops until an existing file path is entered. If a default is passed and
 # the user enters nothing, returns the default without validating it. Does

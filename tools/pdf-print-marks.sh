@@ -17,24 +17,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" &>/dev/null && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
-# ── Dependency check ─────────────────────────────────────────
-# Same needs as pdf-signer.sh (OCR + the shared venv).
+# ── Dependency check + Python virtual environment ───────────
+# OCR packages plus the signer's persistent venv (SIGNER_VENV_DIR); see
+# ensure_ocr_env in common.sh.
 
-mapfile -t MISSING_APT < <(python_venv_apt_pkgs)
-mapfile -t -O "${#MISSING_APT[@]}" MISSING_APT < <(ocr_apt_pkgs)
-
-apt_install_missing "${MISSING_APT[@]}"
-
-ok "system dependencies found"
-
-echo ""
-
-# ── Python virtual environment ───────────────────────────────
-# Shares the signer's venv (same packages); see ensure_venv in common.sh.
-
+ensure_ocr_env
 VENV_PYTHON="$SIGNER_VENV_DIR/bin/python"
-
-ensure_venv "$SIGNER_VENV_DIR" "${SIGNER_PACKAGES[@]}"
 
 echo ""
 

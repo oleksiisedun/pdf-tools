@@ -16,27 +16,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" &>/dev/null && pwd)"
 source "$SCRIPT_DIR/common.sh"
 
-# ── Dependency check ─────────────────────────────────────────
-# Same auto-install approach as pdf-contrast-enhancer.sh: multiple apt
-# packages plus a Python venv, so missing pieces are installed instead of
-# just printing instructions and exiting.
+# ── Dependency check + Python virtual environment ───────────
+# OCR packages plus the signer's persistent venv (SIGNER_VENV_DIR); see
+# ensure_ocr_env in common.sh.
 
-mapfile -t MISSING_APT < <(python_venv_apt_pkgs)
-mapfile -t -O "${#MISSING_APT[@]}" MISSING_APT < <(ocr_apt_pkgs)
-
-apt_install_missing "${MISSING_APT[@]}"
-
-ok "system dependencies found"
-
-echo ""
-
-# ── Python virtual environment ───────────────────────────────
-# Persistent venv at ~/.pdf-signer-venv (SIGNER_VENV_DIR); see ensure_venv in
-# common.sh.
-
+ensure_ocr_env
 VENV_PYTHON="$SIGNER_VENV_DIR/bin/python"
-
-ensure_venv "$SIGNER_VENV_DIR" "${SIGNER_PACKAGES[@]}"
 
 echo ""
 
@@ -100,10 +85,11 @@ echo ""
 DEFAULT_GAP=10
 DEFAULT_HEIGHT=48
 DEFAULT_SHIFT=0
+SIGNED_NUMBER_RE='^-?[0-9]+(\.[0-9]+)?$'
 
-GAP=$(prompt_number "Gap between signature and name, in points (default: $DEFAULT_GAP): " "$DEFAULT_GAP" '^-?[0-9]+(\.[0-9]+)?$')
+GAP=$(prompt_number "Gap between signature and name, in points (default: $DEFAULT_GAP): " "$DEFAULT_GAP" "$SIGNED_NUMBER_RE")
 HEIGHT=$(prompt_number "Signature height, in points (default: $DEFAULT_HEIGHT): " "$DEFAULT_HEIGHT" '^[0-9]+(\.[0-9]+)?$')
-SHIFT=$(prompt_number "Extra horizontal shift, in points, positive = further right (default: $DEFAULT_SHIFT): " "$DEFAULT_SHIFT" '^-?[0-9]+(\.[0-9]+)?$')
+SHIFT=$(prompt_number "Extra horizontal shift, in points, positive = further right (default: $DEFAULT_SHIFT): " "$DEFAULT_SHIFT" "$SIGNED_NUMBER_RE")
 
 # ── Run ───────────────────────────────────────────────────────
 # The signing logic lives in tools/py/pdf-signer.py and runs through the
