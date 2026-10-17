@@ -1,11 +1,16 @@
 # Tool configuration only (not a packaged project): ruff and pyright settings
 # for the payloads in tools/py/, run through ./check.sh.
 
+[tool.ruff]
+# Matches the `X | None` syntax in tools/py/ (needs Python 3.10+).
+target-version = "py310"
+
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
 
 [tool.pyright]
-include = ["tools/py", "tests/py"]
+include = ["tools/py", "tests/py", "tests/e2e"]
+pythonVersion = "3.10"
 # The tool venvs live under $HOME, not next to the repo, so third-party
 # imports don't resolve here; the checks still cover our own code.
 reportMissingImports = false
