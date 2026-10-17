@@ -36,11 +36,11 @@ With no arguments it shows an interactive menu of all tools; pick one, and after
 
 ```mermaid
 graph TD
-  Menu["pdf-tools.sh\n(entry point)"]
+  Menu["pdf-tools.sh<br>(entry point)"]
 
   subgraph Tools["tools/"]
-    Common["common.sh\n(shared helpers)"]
-    Py["py/\n(Python payloads)"]
+    Common["common.sh<br>(shared helpers)"]
+    Py["py/<br>(Python payloads)"]
     A5["pdf-a5-print.sh"]
     Compressor["pdf-compressor.sh"]
     Contrast["pdf-contrast-enhancer.sh"]
@@ -68,12 +68,12 @@ graph TD
   Contrast --> Py
   Signer --> Py
   Marks --> Py
-  Contrast --> Venv[("Python venv\npdf2image + pillow + img2pdf")]
+  Contrast --> Venv[("Python venv<br>pdf2image + pillow + img2pdf")]
   ToVideo --> Pdftoppm[("pdftoppm / poppler-utils")]
   ToVideo --> Ffmpeg[("ffmpeg")]
-  Marks --> SignerVenv
-  Signer --> SignerVenv[("Python venv\npymupdf + pytesseract + pillow")]
+  Signer --> SignerVenv[("Python venv<br>pymupdf + pytesseract + pillow")]
   Signer --> Tesseract[("tesseract-ocr + tesseract-ocr-ukr")]
+  Marks --> SignerVenv
   Marks --> Tesseract
 ```
 
@@ -196,7 +196,7 @@ For fast static checks that don't execute anything or need the PDF tools install
 
 This runs `bash -n`, `shellcheck` and `shfmt -d` on every script, repo-specific convention checks (`checks/conventions.sh`), and a syntax + `ruff` (lint and format) + `pyright` pass over `tools/py/*.py` and `tests/py/*.py` (`checks/python.sh`). `shellcheck` and `shfmt` (`sudo apt install shellcheck shfmt`) and `ruff` and `pyright` (`pip install ruff pyright`) are optional locally — a missing one is skipped with a warning — but set `CI=1` to make a missing tool a failure. Fix formatting with `shfmt -w` and `ruff format tools/py tests/py`. (These dev-only tools are installed with plain `pip`, not `uv` — there's no project package or lockfile to manage here, just two linters.)
 
-Unit tests for the signer's pure logic (name matching, signature placement, batch handling) live in `tests/py/` and run with:
+Unit tests for the pure logic of the signer (name matching, signature placement, batch handling) and print-marks (surname detection, mark count and placement) live in `tests/py/` and run with:
 
 ```bash
 ./test.sh                # all tests
@@ -213,6 +213,13 @@ Unit tests for pure bash logic (`clean_path`, `ensure_extension`, `default_outpu
 ```
 
 These tests `source` the owning script directly; `pdf-tools.sh` and `pdf-compressor.sh` guard their interactive body behind `if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then ... fi` so sourcing them defines the functions without running the menu or prompting for input.
+
+End-to-end tests drive the real tools through their prompts (answers piped into stdin) on generated fixtures, and need the tools' system dependencies; a test skips itself when one is missing. They currently cover the compressor, the signer, print-marks (annotation flags, count per intensity, original bytes preserved) and to-video (duration, resolution and codec checked with `ffprobe`):
+
+```bash
+./test-e2e.sh              # all e2e tests (~20 s)
+./test-e2e.sh -f signer    # extra arguments go to bats
+```
 
 ### Adding a tool
 
