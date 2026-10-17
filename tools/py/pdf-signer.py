@@ -2,22 +2,11 @@ import argparse
 from pathlib import Path
 
 import pymupdf
-import pytesseract
+from ocr_common import OCR_DPI, ocr_words
 from PIL import Image
-
-OCR_DPI = 150
-OCR_LANG = "ukr"
 
 Box = tuple[float, float, float, float]
 Word = tuple[str, int, int, int, int]  # text, left, top, width, height (pixels)
-
-
-def _ocr_words(page: pymupdf.Page, dpi: int = OCR_DPI) -> dict[str, list]:
-    pix = page.get_pixmap(dpi=dpi)
-    img = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
-    return pytesseract.image_to_data(
-        img, lang=OCR_LANG, output_type=pytesseract.Output.DICT
-    )
 
 
 def find_name_box(
@@ -27,7 +16,7 @@ def find_name_box(
     page where the words of `name_parts` appear next to each other (matched
     by prefix, so Ukrainian case endings like СЕДУН / СЕДУНУ / СЕДУНА still
     match), or None if not found."""
-    return match_name_box(_ocr_words(page, dpi), name_parts, dpi)
+    return match_name_box(ocr_words(page, dpi), name_parts, dpi)
 
 
 def match_name_box(

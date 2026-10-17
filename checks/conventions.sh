@@ -54,6 +54,7 @@ done
 # Python payloads live in tools/py/pdf-<name>.py next to their owning
 # tools/pdf-<name>.sh, never in heredocs (which no linter looks inside).
 for py in tools/py/*.py; do
+    [[ "$(basename "$py")" == ocr_common.py ]] && continue # shared helper, no tool of its own
     [[ -f "tools/$(basename "$py" .py).sh" ]] || fail "$py: no matching tools/$(basename "$py" .py).sh"
 done
 for f in tools/*.sh; do
