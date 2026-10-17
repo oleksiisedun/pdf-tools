@@ -11,6 +11,7 @@ A collection of small interactive bash scripts for common PDF tasks. All tools l
 | [pdf-contrast-enhancer](#pdf-contrast-enhancer) | Increases the contrast and sharpness of a scanned/photographed PDF |
 | [pdf-to-video](#pdf-to-video) | Converts a PDF presentation into an MP4 slideshow video, one fixed-duration slide per page |
 | [pdf-signer](#pdf-signer) | OCRs a scanned PDF for a signer's printed name and stamps a signature image next to it |
+| [pdf-print-marks](#pdf-print-marks) | OCRs a scanned PDF and adds print-only (invisible on screen) punctuation marks after ALL-CAPS surnames |
 
 ## Quick start
 
@@ -45,6 +46,7 @@ graph TD
     Contrast["pdf-contrast-enhancer.sh"]
     ToVideo["pdf-to-video.sh"]
     Signer["pdf-signer.sh"]
+    Marks["pdf-print-marks.sh"]
   end
 
   Menu --> A5
@@ -52,22 +54,27 @@ graph TD
   Menu --> Contrast
   Menu --> ToVideo
   Menu --> Signer
+  Menu --> Marks
 
   A5 --> Common
   Compressor --> Common
   Contrast --> Common
   ToVideo --> Common
   Signer --> Common
+  Marks --> Common
 
   A5 --> Pdfjam[("pdfjam / texlive-extra-utils")]
   Compressor --> Ghostscript[("Ghostscript")]
   Contrast --> Py
   Signer --> Py
+  Marks --> Py
   Contrast --> Venv[("Python venv\npdf2image + pillow + img2pdf")]
   ToVideo --> Pdftoppm[("pdftoppm / poppler-utils")]
   ToVideo --> Ffmpeg[("ffmpeg")]
+  Marks --> SignerVenv
   Signer --> SignerVenv[("Python venv\npymupdf + pytesseract + pillow")]
   Signer --> Tesseract[("tesseract-ocr + tesseract-ocr-ukr")]
+  Marks --> Tesseract
 ```
 
 ## Tool details
@@ -139,6 +146,14 @@ sudo apt install poppler-utils ffmpeg
 Prompts for the input PDF, seconds per slide (default: 5), and an output file name (defaults to `<original-name>_slideshow.mp4`).
 
 Each page is rendered at 150 DPI and encoded into a 1920x1080 letterboxed H.264/yuv420p video for broad TV/USB playback compatibility.
+
+### pdf-print-marks
+
+OCRs a scanned PDF and finds ALL-CAPS surnames (Cyrillic words of 4+ letters followed by initials or ending like a Ukrainian surname; stoplist in `tools/py/pdf-print-marks.py`). Then it places a random `.` `,` `;` or `"` right after some of them. Each mark is a PDF annotation with the Print and NoView flags, so it is invisible on screen and appears only when printed; the scan itself is not modified. Prompts for an input PDF, an output path and an intensity from 1 (one surname) to 10 (all of them). Uses the signer's venv and the same apt packages. Viewer/printer results: [docs/print-marks-viewers.md](docs/print-marks-viewers.md).
+
+```bash
+./tools/pdf-print-marks.sh
+```
 
 ### pdf-signer
 
