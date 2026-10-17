@@ -90,6 +90,38 @@ def test_annotation_flags_are_print_plus_noview():
     assert marks.ANNOT_FLAGS == 4 | 32
 
 
+def test_hidden_annotation_flag_is_hidden_only():
+    assert marks.HIDDEN_ANNOT_FLAGS == 2
+
+
+def test_read_message_strips_whitespace(tmp_path):
+    f = tmp_path / "m.txt"
+    f.write_text("  привіт\n\n", encoding="utf-8")
+    assert marks.read_message(f) == "привіт"
+
+
+def test_read_message_rejects_blank_file(tmp_path):
+    f = tmp_path / "m.txt"
+    f.write_text(" \n", encoding="utf-8")
+    with pytest.raises(ValueError):
+        marks.read_message(f)
+
+
+def test_add_hidden_message_stores_text_without_changing_the_render():
+    import pymupdf
+
+    with pymupdf.open() as doc:
+        doc.new_page()
+        page = doc[0]  # annotations die with their page object
+        before = page.get_pixmap().samples
+        marks.add_hidden_message(doc, "секрет")
+        annots = list(page.annots())
+        assert len(annots) == 1
+        assert annots[0].flags == marks.HIDDEN_ANNOT_FLAGS
+        assert annots[0].info["content"] == "секрет"
+        assert page.get_pixmap().samples == before
+
+
 def test_seeded_choice_is_deterministic():
     picks = [random.Random(7).choice(marks.MARKS) for _ in range(3)]
     assert len(set(picks)) == 1

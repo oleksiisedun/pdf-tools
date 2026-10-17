@@ -149,7 +149,7 @@ Each page is rendered at 150 DPI and encoded into a 1920x1080 letterboxed H.264/
 
 ### pdf-print-marks
 
-OCRs a scanned PDF and finds ALL-CAPS surnames (Cyrillic words of 4+ letters followed by initials or ending like a Ukrainian surname; stoplist in `tools/py/pdf-print-marks.py`). Then it places a random `.` `,` `;` or `"` right after some of them. Each mark is a PDF annotation with the Print and NoView flags, so it is invisible on screen and appears only when printed; the scan itself is not modified. Prompts for an input PDF, an output path and an intensity from 1 (one surname) to 10 (all of them). Uses the signer's venv and the same apt packages. Viewer/printer results: [docs/print-marks-viewers.md](docs/print-marks-viewers.md).
+OCRs a scanned PDF and finds ALL-CAPS surnames (Cyrillic words of 4+ letters followed by initials or ending like a Ukrainian surname; stoplist in `tools/py/pdf-print-marks.py`). Then it places a random `.` `,` `;` or `"` right after some of them. Each mark is a PDF annotation with the Print and NoView flags, so it is invisible on screen and appears only when printed; the scan itself is not modified. Prompts for an input PDF, an output path and an intensity from 1 (one surname) to 10 (all of them). It can also embed the text of `pdf-print-marks-hidden-message.txt` (repo root) as an annotation on page 1 with the Hidden flag, so it is shown neither on screen nor on paper but can be read with a PDF inspector. Uses the signer's venv and the same apt packages. Viewer/printer results: [docs/print-marks-viewers.md](docs/print-marks-viewers.md).
 
 ```bash
 ./tools/pdf-print-marks.sh

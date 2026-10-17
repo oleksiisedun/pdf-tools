@@ -13,6 +13,10 @@ SIGNER_VENV_DIR="$HOME/.pdf-signer-venv"
 # shellcheck disable=SC2034 # used by the scripts that source this file
 SIGNER_PACKAGES=(pymupdf pytesseract pillow)
 
+# The text pdf-print-marks can embed as an invisible annotation.
+# shellcheck disable=SC2034 # used by the scripts that source this file
+HIDDEN_MESSAGE_FILE="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/.." &>/dev/null && pwd)/pdf-print-marks-hidden-message.txt"
+
 # ok/warn/err write to stderr (not stdout) because prompt_output_path() below
 # is called via command substitution ($(...)); if these wrote to stdout their
 # text would get captured into the caller's return value instead of the path.

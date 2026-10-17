@@ -6,6 +6,8 @@
 #  ALL-CAPS surnames in a scanned PDF. Each mark is a PDF
 #  annotation with the Print and NoView flags: invisible on
 #  screen, present only on paper. The scan itself is untouched.
+#  Optionally also embeds pdf-print-marks-hidden-message.txt as an annotation
+#  that is neither shown nor printed.
 #  Dependencies: python3, python3-venv, tesseract-ocr,
 #  tesseract-ocr-ukr (installed automatically below if missing)
 # ============================================================
@@ -53,6 +55,17 @@ DEFAULT_INTENSITY=5
 
 INTENSITY=$(prompt_number "Intensity 1-10: 1 marks one surname, 10 marks all (default: $DEFAULT_INTENSITY): " "$DEFAULT_INTENSITY" '^([1-9]|10)$' "Enter a whole number from 1 to 10.")
 
+# ── Option: hidden message ────────────────────────────────────
+MESSAGE_ARGS=()
+read -rp "Embed the hidden message from pdf-print-marks-hidden-message.txt? [y/N]: " EMBED_MESSAGE
+if [[ "$EMBED_MESSAGE" =~ ^[Yy]$ ]]; then
+    if [[ ! -s "$HIDDEN_MESSAGE_FILE" ]]; then
+        err "$HIDDEN_MESSAGE_FILE is missing or empty."
+        exit 1
+    fi
+    MESSAGE_ARGS=(--message-file "$HIDDEN_MESSAGE_FILE")
+fi
+
 # ── Run ───────────────────────────────────────────────────────
 init_logfile
 
@@ -61,6 +74,7 @@ set +e
 
 "$VENV_PYTHON" "$SCRIPT_DIR/py/pdf-print-marks.py" \
     --input "$INPUT" --output "$OUTPUT" --intensity "$INTENSITY" \
+    "${MESSAGE_ARGS[@]}" \
     2>"$LOGFILE"
 
 PYTHON_EXIT=$?

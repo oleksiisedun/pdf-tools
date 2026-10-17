@@ -28,6 +28,9 @@ LEFT_PAD_RATIO = 0.1
 TOP_OFFSET_RATIO = 0.15
 # PDF 32000-1 table 165: Print (bit 3) + NoView (bit 6).
 ANNOT_FLAGS = pymupdf.PDF_ANNOT_IS_PRINT | pymupdf.PDF_ANNOT_IS_NO_VIEW
+# Hidden (bit 2): never displayed and never printed.
+HIDDEN_ANNOT_FLAGS = pymupdf.PDF_ANNOT_IS_HIDDEN
+HIDDEN_ANNOT_RECT = (0, 0, 1, 1)
 
 
 def strip_punctuation(text: str) -> str:
@@ -89,8 +92,29 @@ def mark_rect(word_box: Box) -> Box:
     return (left, top, left + size, top + size)
 
 
+def read_message(path: Path) -> str:
+    text = path.read_text(encoding="utf-8").strip()
+    if not text:
+        raise ValueError(f"Файл з повідомленням порожній: {path}")
+    return text
+
+
+def add_hidden_message(doc: pymupdf.Document, text: str) -> None:
+    """Store `text` in an annotation on page 1 that is neither shown nor printed."""
+    annot = doc[0].add_freetext_annot(
+        pymupdf.Rect(*HIDDEN_ANNOT_RECT), text, fontsize=1, text_color=(0, 0, 0)
+    )
+    annot.set_border(width=0)
+    annot.set_flags(HIDDEN_ANNOT_FLAGS)
+    annot.update()
+
+
 def add_marks(
-    input_pdf: Path, output_pdf: Path, intensity: int, seed: int | None
+    input_pdf: Path,
+    output_pdf: Path,
+    intensity: int,
+    seed: int | None,
+    message: str | None = None,
 ) -> int:
     """Copy `input_pdf` and append print-only marks as an incremental update,
     so the original objects (page content, image streams) stay byte-identical."""
@@ -116,6 +140,8 @@ def add_marks(
             annot.set_border(width=0)
             annot.set_flags(ANNOT_FLAGS)
             annot.update()
+        if message is not None:
+            add_hidden_message(doc, message)
         doc.saveIncr()
     return len(chosen)
 
@@ -127,7 +153,10 @@ if __name__ == "__main__":
     # No default: tools/pdf-print-marks.sh owns it (DEFAULT_INTENSITY).
     ap.add_argument("--intensity", required=True, type=int, choices=range(1, 11))
     ap.add_argument("--seed", type=int)
+    ap.add_argument("--message-file", type=Path)
     args = ap.parse_args()
 
-    n = add_marks(args.input, args.output, args.intensity, args.seed)
-    print(f"[{args.input.name}] позначок додано: {n} -> {args.output}")
+    message = read_message(args.message_file) if args.message_file else None
+    n = add_marks(args.input, args.output, args.intensity, args.seed, message)
+    note = ", прихований текст додано" if message is not None else ""
+    print(f"[{args.input.name}] позначок додано: {n}{note} -> {args.output}")

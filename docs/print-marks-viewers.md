@@ -11,6 +11,7 @@ The scan itself is untouched: the output is the input plus an incremental update
 | Every added annotation has `/F` = 36 | pass |
 | Output starts with the input's exact bytes (image streams byte-identical) | pass |
 | Screen render of output == screen render of input | pass |
+| Hidden-message annotation has `/F` = 2 and does not change the render | pass |
 | Render with NoView cleared shows the marks on the baseline after the surname | pass |
 
 ## Manual checks (real printer)

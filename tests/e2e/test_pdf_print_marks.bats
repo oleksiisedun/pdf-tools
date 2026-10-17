@@ -12,10 +12,11 @@ setup() {
     make_fixture scan "$IN"
 }
 
-# run_marks <intensity>: answers the prompts with an explicit output path.
+# run_marks <intensity> [y|n]: answers the prompts with an explicit output path;
+# the optional second answer is for the hidden-message prompt (default n).
 run_marks() {
-    run bash -c 'printf "%s\n" "$1" "$2" "$3" | "$4"' _ \
-        "$IN" "$OUT" "$1" "$ROOT/tools/pdf-print-marks.sh"
+    run bash -c 'printf "%s\n" "$1" "$2" "$3" "$4" | "$5"' _ \
+        "$IN" "$OUT" "$1" "${2:-n}" "$ROOT/tools/pdf-print-marks.sh"
 }
 
 @test "intensity 10 marks every surname with print-only annotations" {
@@ -50,4 +51,19 @@ run_marks() {
     run_marks 5
     [ "$status" -ne 0 ]
     [[ "$output" == *"не знайдено"* ]]
+}
+
+@test "embeds the hidden message as a Hidden annotation when asked" {
+    run_marks 10 y
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"прихований текст"* ]]
+    run pdf_annot_summary "$OUT"
+    [ "${#lines[@]}" -eq 3 ]
+    [[ "$output" == *"FreeText 2"* ]]
+}
+
+@test "adds no hidden annotation when declined" {
+    run_marks 10 n
+    run pdf_annot_summary "$OUT"
+    [[ "$output" != *"FreeText 2"* ]]
 }
