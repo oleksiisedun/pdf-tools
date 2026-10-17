@@ -1,3 +1,5 @@
+"""Adds print-only punctuation marks after ALL-CAPS surnames in a scanned PDF."""
+
 import argparse
 import random
 import re
@@ -5,9 +7,7 @@ import shutil
 from pathlib import Path
 
 import pymupdf
-from ocr_common import OCR_DPI, ocr_words
-
-Box = tuple[float, float, float, float]
+from ocr_common import OCR_DPI, Box, group_lines, ocr_words
 
 MARKS = (".", ",", ";", '"')
 MIN_SURNAME_LETTERS = 4
@@ -55,15 +55,8 @@ def looks_like_surname(word: str, next_word: str | None) -> bool:
 def find_surname_boxes(data: dict[str, list], dpi: int = OCR_DPI) -> list[Box]:
     """Boxes (PDF points) of the surnames in pytesseract's image_to_data dict."""
     scale = 72.0 / dpi
-    lines: dict[tuple[int, int, int], list[int]] = {}
-    for i, text in enumerate(data["text"]):
-        if text.strip():
-            key = (data["block_num"][i], data["par_num"][i], data["line_num"][i])
-            lines.setdefault(key, []).append(i)
-
     boxes = []
-    for indices in lines.values():
-        indices.sort(key=lambda i: data["left"][i])
+    for indices in group_lines(data):
         for pos, i in enumerate(indices):
             nxt = data["text"][indices[pos + 1]] if pos + 1 < len(indices) else None
             if looks_like_surname(data["text"][i], nxt):

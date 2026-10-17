@@ -1,11 +1,12 @@
+"""Stamps a signature image next to a signer's printed name (OCR)."""
+
 import argparse
 from pathlib import Path
 
 import pymupdf
-from ocr_common import OCR_DPI, ocr_words
+from ocr_common import OCR_DPI, Box, group_lines, ocr_words
 from PIL import Image
 
-Box = tuple[float, float, float, float]
 Word = tuple[str, int, int, int, int]  # text, left, top, width, height (pixels)
 
 
@@ -25,19 +26,18 @@ def match_name_box(
     """Pure matching half of `find_name_box`: `data` is pytesseract's
     image_to_data dict (pixel coordinates at `dpi`), `name_parts` upper-case."""
     scale = 72.0 / dpi
-    lines: dict[tuple[int, int, int], list[Word]] = {}
-    for i in range(len(data["text"])):
-        w = data["text"][i].strip()
-        if not w:
-            continue
-        key = (data["block_num"][i], data["par_num"][i], data["line_num"][i])
-        lines.setdefault(key, []).append(
-            (w, data["left"][i], data["top"][i], data["width"][i], data["height"][i])
-        )
-
     k = len(name_parts)
-    for line_words in lines.values():
-        words = sorted(line_words, key=lambda w: w[1])
+    for indices in group_lines(data):
+        words: list[Word] = [
+            (
+                data["text"][i].strip(),
+                data["left"][i],
+                data["top"][i],
+                data["width"][i],
+                data["height"][i],
+            )
+            for i in indices
+        ]
         for start in range(len(words) - k + 1):
             window = words[start : start + k]
             if all(

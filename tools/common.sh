@@ -130,6 +130,14 @@ python_venv_apt_pkgs() {
     python3 -c "import venv" 2>/dev/null || echo "python3-venv"
 }
 
+# ocr_apt_pkgs
+# Echoes "tesseract-ocr" and/or "tesseract-ocr-ukr" (one per line), whichever
+# the system is missing.
+ocr_apt_pkgs() {
+    command -v tesseract >/dev/null 2>&1 || echo tesseract-ocr
+    tesseract --list-langs 2>/dev/null | grep -qx ukr || echo tesseract-ocr-ukr
+}
+
 # apt_install_missing <apt-package>...
 # Installs the given packages via apt; a no-op when called with none, so
 # callers can pass their (possibly empty) missing-package array unconditionally.

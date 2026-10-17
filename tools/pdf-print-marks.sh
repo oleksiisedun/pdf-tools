@@ -19,8 +19,7 @@ source "$SCRIPT_DIR/common.sh"
 # Same needs as pdf-signer.sh (OCR + the shared venv).
 
 mapfile -t MISSING_APT < <(python_venv_apt_pkgs)
-command -v tesseract >/dev/null 2>&1 || MISSING_APT+=(tesseract-ocr)
-tesseract --list-langs 2>/dev/null | grep -qx ukr || MISSING_APT+=(tesseract-ocr-ukr)
+mapfile -t -O "${#MISSING_APT[@]}" MISSING_APT < <(ocr_apt_pkgs)
 
 apt_install_missing "${MISSING_APT[@]}"
 

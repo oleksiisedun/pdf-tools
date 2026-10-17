@@ -93,3 +93,11 @@ def test_annotation_flags_are_print_plus_noview():
 def test_seeded_choice_is_deterministic():
     picks = [random.Random(7).choice(marks.MARKS) for _ in range(3)]
     assert len(set(picks)) == 1
+
+
+def test_group_lines_skips_blanks_and_orders_left_to_right():
+    from ocr_common import group_lines
+
+    data = ocr_line("B", " ", "A")
+    data["left"] = [200, 100, 0]
+    assert group_lines(data) == [[2, 0]]
